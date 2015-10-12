@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+        <TextView
+            android:id="@+id/fragtwotitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/fragtwotitle"
+            android:textSize="20sp"
+            android:layout_gravity="fill_horizontal"
+            android:typeface="monospace"
+            android:padding="16dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/status"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/con_status_two"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/undefined"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:padding="16dp"/>
+        </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="@string/eeg"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/eeg_tp9"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp"
+            tools:ignore="NestedWeights" />
+
+        <TextView
+            android:id="@+id/eeg_fp1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/eeg_fp2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/eeg_tp10"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="@string/accel"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/acc_x"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp"
+            tools:ignore="NestedWeights" />
+
+        <TextView
+            android:id="@+id/acc_y"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/acc_z"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="@string/muse_elem"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/elem1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp"
+            tools:ignore="NestedWeights" />
+
+        <TextView
+            android:id="@+id/elem2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/elem3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/elem4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="@string/artifacts"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/blink"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp"
+            tools:ignore="NestedWeights" />
+
+        <TextView
+            android:id="@+id/jaw"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val"
+            android:textSize="16sp" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="@string/mellow_concentration"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/mellow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val_percent"
+            android:textSize="16sp"
+            tools:ignore="NestedWeights" />
+
+        <TextView
+            android:id="@+id/concentration"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/init_val_percent"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</LinearLayout>
+
+</RelativeLayout>
