@@ -33,7 +33,6 @@ import com.interaxon.libmuse.AnnotationData;
 import com.interaxon.libmuse.ConnectionState;
 import com.interaxon.libmuse.Eeg;
 import com.interaxon.libmuse.LibMuseVersion;
-import com.interaxon.libmuse.MessageType;
 import com.interaxon.libmuse.Muse;
 import com.interaxon.libmuse.MuseArtifactPacket;
 import com.interaxon.libmuse.MuseConfiguration;
@@ -42,8 +41,6 @@ import com.interaxon.libmuse.MuseConnectionPacket;
 import com.interaxon.libmuse.MuseDataListener;
 import com.interaxon.libmuse.MuseDataPacket;
 import com.interaxon.libmuse.MuseDataPacketType;
-import com.interaxon.libmuse.MuseFileFactory;
-import com.interaxon.libmuse.MuseFileReader;
 import com.interaxon.libmuse.MuseFileWriter;
 import com.interaxon.libmuse.MuseManager;
 import com.interaxon.libmuse.MusePreset;
@@ -53,12 +50,26 @@ import android.support.v7.widget.Toolbar;
  
 public class FragmentOne extends Fragment implements View.OnClickListener{
 
-        private Muse muse = null;
+        private Muse tempmuse = null;
         private boolean dataTransmission = true;
         private int clench_count = 0;
         public static MainActivity.ConnectionListener connectionListener = null;
         public static MainActivity.DataListener dataListener = null;
         private static ArrayAdapter<String> adapterArray = null;
+        update_conn_status mconnstatus = null;
+
+
+        interface  update_conn_status{
+
+            public void update_status(MuseConnectionPacket p);
+
+            public void configureLibrary();
+
+            public Muse getmuse();
+
+            public void setmuse(Muse tempmuse);
+
+    }
 
 
         @Override
@@ -84,16 +95,17 @@ public class FragmentOne extends Fragment implements View.OnClickListener{
                     Log.w("Muse Headband", "There is nothing to connect to");
                 }
                 else {
-                    muse = ((MainActivity)getActivity()).getmuse();
-                    muse = pairedMuses.get(musesSpinner.getSelectedItemPosition());
-                    ConnectionState state = muse.getConnectionState();
+
+                    tempmuse = pairedMuses.get(musesSpinner.getSelectedItemPosition());
+                    mconnstatus.setmuse(tempmuse);
+                    ConnectionState state = tempmuse.getConnectionState();
                     if (state == ConnectionState.CONNECTED ||
                             state == ConnectionState.CONNECTING) {
                         Log.w("Muse Headband",
                                 "doesn't make sense to connect second time to the same muse");
                         return;
                     }
-                    configureLibrary();
+                    mconnstatus.configureLibrary();
 
                     /**
                      * In most cases libmuse native library takes care about
@@ -102,14 +114,14 @@ public class FragmentOne extends Fragment implements View.OnClickListener{
                      * connection). Print all exceptions here.
                      */
                     try {
-                        muse.runAsynchronously();
+                        tempmuse.runAsynchronously();
                     } catch (Exception e) {
                         Log.e("Muse Headband", e.toString());
                     }
                 }
             }
             else if (v.getId() == R.id.disconnect) {
-                if (muse != null) {
+                if (tempmuse != null) {
                     /**
                      * true flag will force libmuse to unregister all listeners,
                      * BUT AFTER disconnecting and sending disconnection event.
@@ -119,7 +131,7 @@ public class FragmentOne extends Fragment implements View.OnClickListener{
                      * muse.unregisterAllListeners();
                      * muse.disconnect(false);
                      */
-                    muse.disconnect(true);
+                    tempmuse.disconnect(true);
 
                 }
             }
@@ -128,7 +140,20 @@ public class FragmentOne extends Fragment implements View.OnClickListener{
 
 
 
+    @Override
+    public void onAttach(Activity activity)
+    {
+        super.onAttach(activity);
+        if(activity instanceof update_conn_status)
+        {
+            mconnstatus = (update_conn_status)activity;
+        }
+        else
+        {
+            throw new ClassCastException();
+        }
 
+    }
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
@@ -181,65 +206,13 @@ public class FragmentOne extends Fragment implements View.OnClickListener{
 
     public void configureLibrary() {
 
-       // muse = ((MainActivity)getActivity()).getmuse();
-        connectionListener = ((MainActivity)getActivity()).getConnectionListener();
-        dataListener = ((MainActivity)getActivity()).getDataListener();
 
-        muse.registerConnectionListener(connectionListener);
-        muse.registerDataListener(dataListener,
-                MuseDataPacketType.ACCELEROMETER);
-        muse.registerDataListener(dataListener,
-                MuseDataPacketType.EEG);
-        muse.registerDataListener(dataListener,
-                MuseDataPacketType.ALPHA_RELATIVE);
-        muse.registerDataListener(dataListener,
-                MuseDataPacketType.ARTIFACTS);
-        muse.registerDataListener(dataListener,
-                MuseDataPacketType.BATTERY);
-        muse.registerDataListener(dataListener,
-                MuseDataPacketType.MELLOW);
-        muse.registerDataListener(dataListener,
-                MuseDataPacketType.CONCENTRATION);
-        muse.setPreset(MusePreset.PRESET_14);
-        muse.enableDataTransmission(dataTransmission);
+
+
+
     }
 
-   public void update_status(MuseConnectionPacket p){
 
-       final ConnectionState current = p.getCurrentConnectionState();
-       final String status = p.getPreviousConnectionState().toString() +
-               " -> " + current;
-       final String full = "Muse " + p.getSource().getMacAddress() +
-               " " + status;
-       Log.i("Muse Headband", full);
-       Activity activity = getActivity();
-       // UI thread is used here only because we need to update
-       // TextView values. You don't have to use another thread, unless
-       // you want to run disconnect() or connect() from connection packet
-       // handler. In this case creating another thread is required.
-       if (activity != null) {
-           activity.runOnUiThread(new Runnable() {
-               @Override
-               public void run() {
-                   TextView statusText =
-                           (TextView) ((MainActivity)getActivity()).findViewById(R.id.con_status);
-                   statusText.setText(status);
-//                       TextView museVersionText =
-//                               (TextView) findViewById(R.id.version);
-//                        if (current == ConnectionState.CONNECTED) {
-//                            MuseVersion museVersion = muse.getMuseVersion();
-//                            String version = museVersion.getFirmwareType() +
-//                                 " - " + museVersion.getFirmwareVersion() +
-//                                 " - " + Integer.toString(
-//                                    museVersion.getProtocolVersion());
-//                            museVersionText.setText(version);
-//                        } else {
-//                            museVersionText.setText(R.string.undefined);
-//                        }
-               }
-           });
-       }
-   }
 
 
 

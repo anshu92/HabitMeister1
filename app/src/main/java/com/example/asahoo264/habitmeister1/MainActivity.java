@@ -22,7 +22,6 @@ import com.interaxon.libmuse.AnnotationData;
 import com.interaxon.libmuse.ConnectionState;
 import com.interaxon.libmuse.Eeg;
 import com.interaxon.libmuse.LibMuseVersion;
-import com.interaxon.libmuse.MessageType;
 import com.interaxon.libmuse.Muse;
 import com.interaxon.libmuse.MuseArtifactPacket;
 import com.interaxon.libmuse.MuseConfiguration;
@@ -31,8 +30,6 @@ import com.interaxon.libmuse.MuseConnectionPacket;
 import com.interaxon.libmuse.MuseDataListener;
 import com.interaxon.libmuse.MuseDataPacket;
 import com.interaxon.libmuse.MuseDataPacketType;
-import com.interaxon.libmuse.MuseFileFactory;
-import com.interaxon.libmuse.MuseFileReader;
 import com.interaxon.libmuse.MuseFileWriter;
 import com.interaxon.libmuse.MuseManager;
 import com.interaxon.libmuse.MusePreset;
@@ -42,7 +39,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements FragmentOne.update_conn_status{
 	final String[] data = {"Home", "Raw EEG", "Plot","Calibration"};
 	final String[] fragments = {
 			"com.example.asahoo264.habitmeister1.FragmentOne",
@@ -100,6 +97,74 @@ public class MainActivity extends FragmentActivity {
 
 	}
 
+
+	@Override
+	public void update_status(MuseConnectionPacket p) {
+
+		final ConnectionState current = p.getCurrentConnectionState();
+		final String status = p.getPreviousConnectionState().toString() +
+				" -> " + current;
+		final String full = "Muse " + p.getSource().getMacAddress() +
+				" " + status;
+		Log.i("Muse Headband", full);
+		Activity activity = this;
+		// UI thread is used here only because we need to update
+		// TextView values. You don't have to use another thread, unless
+		// you want to run disconnect() or connect() from connection packet
+		// handler. In this case creating another thread is required.
+		if (activity != null) {
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					TextView statusText =
+							(TextView) findViewById(R.id.con_status);
+					statusText.setText(status);
+//                       TextView museVersionText =
+//                               (TextView) findViewById(R.id.version);
+//                        if (current == ConnectionState.CONNECTED) {
+//                            MuseVersion museVersion = muse.getMuseVersion();
+//                            String version = museVersion.getFirmwareType() +
+//                                 " - " + museVersion.getFirmwareVersion() +
+//                                 " - " + Integer.toString(
+//                                    museVersion.getProtocolVersion());
+//                            museVersionText.setText(version);
+//                        } else {
+//                            museVersionText.setText(R.string.undefined);
+//                        }
+				}
+			});
+		}
+
+	}
+
+	@Override
+	public void configureLibrary() {
+
+		// muse = ((MainActivity)getActivity()).getmuse();
+		connectionListener = this.getConnectionListener();
+		dataListener = this.getDataListener();
+
+
+		muse.registerConnectionListener(connectionListener);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.ACCELEROMETER);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.EEG);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.ALPHA_RELATIVE);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.ARTIFACTS);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.BATTERY);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.MELLOW);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.CONCENTRATION);
+		muse.setPreset(MusePreset.PRESET_14);
+		muse.enableDataTransmission(dataTransmission);
+
+	}
+
 	/**
 	 * Connection listener updates UI with new connection status and logs it.
 	 */
@@ -115,10 +180,10 @@ public class MainActivity extends FragmentActivity {
 		public void receiveMuseConnectionPacket(MuseConnectionPacket p) {
 			FragmentOne fragmentone = (FragmentOne)getSupportFragmentManager().findFragmentById(R.id.mainframe);
 			if(fragmentone != null && fragmentone.isVisible()){
-						fragmentone.update_status(p);}
-			FragmentTwo fragmenttwo = (FragmentTwo)getSupportFragmentManager().findFragmentById(R.id.mainframe);
-			if(fragmenttwo != null && fragmenttwo.isVisible()){
-				fragmenttwo.update_status(p);}
+						fragmentone.mconnstatus.update_status(p);}
+//			FragmentTwo fragmenttwo = (FragmentTwo)getSupportFragmentManager().findFragmentById(R.id.mainframe);
+//			if(fragmenttwo != null && fragmenttwo.isVisible()){
+//				fragmenttwo.update_status(p);}
 
 		}
 	}
@@ -266,6 +331,7 @@ public class MainActivity extends FragmentActivity {
 			private void updateMellow(final ArrayList<Double> data) {
 				FragmentTwo fragment = (FragmentTwo)getSupportFragmentManager().findFragmentById(R.id.mainframe);
 				Activity activity = activityRef.get();
+
 				if (activity != null && fragment != null && fragment.isVisible()) {
 					activity.runOnUiThread(new Runnable() {
 						@Override
@@ -327,10 +393,15 @@ public class MainActivity extends FragmentActivity {
 			//}
 		}
 
-
+		@Override
 		public Muse getmuse() {
 
 			return muse;
+		}
+		@Override
+		public void setmuse(Muse tempmuse) {
+
+			muse = tempmuse;
 		}
 
 		public ConnectionListener getConnectionListener() {
