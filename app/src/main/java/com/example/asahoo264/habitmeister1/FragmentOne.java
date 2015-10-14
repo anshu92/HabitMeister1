@@ -48,95 +48,23 @@ import com.interaxon.libmuse.MuseVersion;
 
 import android.support.v7.widget.Toolbar;
  
-public class FragmentOne extends Fragment implements View.OnClickListener{
+public class FragmentOne extends Fragment{
 
         private Muse tempmuse = null;
         private boolean dataTransmission = true;
         private int clench_count = 0;
         public static MainActivity.ConnectionListener connectionListener = null;
         public static MainActivity.DataListener dataListener = null;
-        private static ArrayAdapter<String> adapterArray = null;
+
         update_conn_status mconnstatus = null;
 
 
         interface  update_conn_status{
 
             public void update_status(MuseConnectionPacket p);
-
-            public void configureLibrary();
-
-            public Muse getmuse();
-
-            public void setmuse(Muse tempmuse);
+            public void setonclickstuff(Button refreshButton, Button connectButton, Button disconnectButton);
 
     }
-
-
-        @Override
-        public void onClick(View v) {
-            Spinner musesSpinner = (Spinner) getActivity().findViewById(R.id.muses_spinner);
-            if (v.getId() == R.id.refresh) {
-                MuseManager.refreshPairedMuses();
-                List<Muse> pairedMuses = MuseManager.getPairedMuses();
-                List<String> spinnerItems = new ArrayList<String>();
-                for (Muse m: pairedMuses) {
-                    String dev_id = m.getName() + "-" + m.getMacAddress();
-                    Log.i("Muse Headband", dev_id);
-                    spinnerItems.add(dev_id);
-                }
-                adapterArray = new ArrayAdapter<String> (
-                        getActivity(), android.R.layout.simple_spinner_item, spinnerItems);
-                musesSpinner.setAdapter(adapterArray);
-            }
-            else if (v.getId() == R.id.connect) {
-                List<Muse> pairedMuses = MuseManager.getPairedMuses();
-                if (pairedMuses.size() < 1 ||
-                        musesSpinner.getAdapter().getCount() < 1) {
-                    Log.w("Muse Headband", "There is nothing to connect to");
-                }
-                else {
-
-                    tempmuse = pairedMuses.get(musesSpinner.getSelectedItemPosition());
-                    mconnstatus.setmuse(tempmuse);
-                    ConnectionState state = tempmuse.getConnectionState();
-                    if (state == ConnectionState.CONNECTED ||
-                            state == ConnectionState.CONNECTING) {
-                        Log.w("Muse Headband",
-                                "doesn't make sense to connect second time to the same muse");
-                        return;
-                    }
-                    mconnstatus.configureLibrary();
-
-                    /**
-                     * In most cases libmuse native library takes care about
-                     * exceptions and recovery mechanism, but native code still
-                     * may throw in some unexpected situations (like bad bluetooth
-                     * connection). Print all exceptions here.
-                     */
-                    try {
-                        tempmuse.runAsynchronously();
-                    } catch (Exception e) {
-                        Log.e("Muse Headband", e.toString());
-                    }
-                }
-            }
-            else if (v.getId() == R.id.disconnect) {
-                if (tempmuse != null) {
-                    /**
-                     * true flag will force libmuse to unregister all listeners,
-                     * BUT AFTER disconnecting and sending disconnection event.
-                     * If you don't want to receive disconnection event (for ex.
-                     * you call disconnect when application is closed), then
-                     * unregister listeners first and then call disconnect:
-                     * muse.unregisterAllListeners();
-                     * muse.disconnect(false);
-                     */
-                    tempmuse.disconnect(true);
-
-                }
-            }
-
-        }
 
 
 
@@ -179,11 +107,10 @@ public class FragmentOne extends Fragment implements View.OnClickListener{
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_one, null);
 
         Button refreshButton = (Button) root.findViewById(R.id.refresh);
-        refreshButton.setOnClickListener(this);
         Button connectButton = (Button) root.findViewById(R.id.connect);
-        connectButton.setOnClickListener(this);
         Button disconnectButton = (Button) root.findViewById(R.id.disconnect);
-        disconnectButton.setOnClickListener(this);
+
+        mconnstatus.setonclickstuff(refreshButton,connectButton,disconnectButton);
 
         // // Uncommet to test Muse File Reader
         //
