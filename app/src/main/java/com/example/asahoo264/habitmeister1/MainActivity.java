@@ -1,6 +1,7 @@
 package com.example.asahoo264.habitmeister1;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -15,8 +16,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
+import com.example.yanyanz.myapplication.gaped.gaped.Gaped;
 import com.interaxon.libmuse.Accelerometer;
 import com.interaxon.libmuse.AnnotationData;
 import com.interaxon.libmuse.ConnectionState;
@@ -40,7 +43,44 @@ import com.interaxon.libmuse.MuseVersion;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.lang.Object;
+import android.os.AsyncTask;
 
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
+import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
+
+import java.io.IOException;
+
+class EndpointsAsyncTask extends AsyncTask<Context, Void, String> {
+	private static Gaped myApiService = null;
+	private Context context;
+
+	@Override
+	protected String doInBackground(Context... params) {
+		if(myApiService == null) {  // Only do this once
+			Gaped.Builder builder = new Gaped.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
+					.setRootUrl("https://habitmeister.appspot.com/_ah/api/");
+			// end options for devappserver
+
+			myApiService = builder.build();
+		}
+
+		context = params[0];
+
+		try {
+			return myApiService.sayHi("Y").execute().getData();
+		} catch (IOException e) {
+			return e.getMessage();
+		}
+	}
+
+	@Override
+	protected void onPostExecute(String result) {
+		Toast.makeText(context, result, Toast.LENGTH_LONG).show();
+	}
+}
 
 public class MainActivity extends FragmentActivity {
 	final String[] data = {"Home", "Raw EEG", "Plot","Calibration"};
@@ -70,7 +110,7 @@ public class MainActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		new EndpointsAsyncTask().execute(this);
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, R.layout.navbarlayout, data);
 
