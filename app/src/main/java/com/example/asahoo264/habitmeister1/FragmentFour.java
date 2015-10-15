@@ -4,7 +4,8 @@ import android.content.Context;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.support.v4.app.Fragment;
+import android.app.Activity;
+import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import java.util.Random;
 public class FragmentFour extends Fragment {
 
     private ImageSwitcher sw;
+    public static int id = 4;
     private  int imageIds[]={R.drawable.a001,R.drawable.a001,R.drawable.n001,R.drawable.sp001,R.drawable.sn001,R.drawable.p001};
     private String[] emotions = {
             "Happy",
@@ -56,10 +58,10 @@ public class FragmentFour extends Fragment {
     public void onStart() {
 
         super.onStart();
-        sw = (ImageSwitcher) ((MainActivity)getActivity()).findViewById(R.id.imageSwitcher);
-        seekBar = (SeekBar) ((MainActivity)getActivity()).findViewById(R.id.seekBar);
-        textView = (TextView) ((MainActivity)getActivity()).findViewById(R.id.progress);
-        timertext = (TextView) ((MainActivity)getActivity()).findViewById(R.id.timer);
+        sw = (ImageSwitcher) (getActivity()).findViewById(R.id.imageSwitcher);
+        seekBar = (SeekBar) (getActivity()).findViewById(R.id.seekBar);
+        textView = (TextView) (getActivity()).findViewById(R.id.progress);
+        timertext = (TextView) (getActivity()).findViewById(R.id.timer);
         timer = new CalibCountDownTimer(startTime,interval);
 
         sw.setFactory(new ViewFactory() {

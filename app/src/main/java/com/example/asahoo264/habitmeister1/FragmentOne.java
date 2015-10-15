@@ -3,7 +3,7 @@ package com.example.asahoo264.habitmeister1;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,18 +50,17 @@ import android.support.v7.widget.Toolbar;
  
 public class FragmentOne extends Fragment{
 
-        private Muse tempmuse = null;
         private boolean dataTransmission = true;
         private int clench_count = 0;
         public static MainActivity.ConnectionListener connectionListener = null;
         public static MainActivity.DataListener dataListener = null;
+        public static int id = 1;
 
         update_conn_status mconnstatus = null;
 
 
         interface  update_conn_status{
 
-            public void update_status(MuseConnectionPacket p);
             public void setonclickstuff(Button refreshButton, Button connectButton, Button disconnectButton);
 
     }
@@ -129,14 +128,6 @@ public class FragmentOne extends Fragment{
 //        fileWriter.addAnnotationString(1, "MainActivity onCreate");
 //        dataListener.setFileWriter(fileWriter);
         return root;
-    }
-
-    public void configureLibrary() {
-
-
-
-
-
     }
 
 

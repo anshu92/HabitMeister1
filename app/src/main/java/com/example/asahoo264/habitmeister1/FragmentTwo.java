@@ -3,7 +3,7 @@ package com.example.asahoo264.habitmeister1;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +16,7 @@ import com.interaxon.libmuse.MuseConnectionPacket;
 
 public class FragmentTwo extends Fragment {
 
+    public static int id = 2;
 
 
     public static Fragment newInstance(Context context) {
@@ -48,7 +49,7 @@ public class FragmentTwo extends Fragment {
                 @Override
                 public void run() {
                     TextView statusText =
-                            (TextView) ((MainActivity)getActivity()).findViewById(R.id.con_status_two);
+                            (TextView) getActivity().findViewById(R.id.con_status_two);
                     statusText.setText(status);
 //                       TextView museVersionText =
 //                               (TextView) findViewById(R.id.version);
