@@ -29,13 +29,13 @@ public class FragmentFour extends Fragment {
     public static int id = 4;
     private  int imageIds[]={R.drawable.a001,R.drawable.a001,R.drawable.n001,R.drawable.sp001,R.drawable.sn001,R.drawable.p001};
     private String[] emotions = {
-            "Happy",
-            "Content",
-            "Calm",
-            "Tired",
-            "Bored",
-            "Sad",
-            "Upset"
+            "HAPPY",
+            "CONTENT",
+            "CALM",
+            "TIRED",
+            "BORED",
+            "SAD",
+            "UPSET"
     };
 
     private int currentIndex=-1;
@@ -75,8 +75,8 @@ public class FragmentFour extends Fragment {
         });
 
         // Initialize the textview with '0'
-        textView.setText("Your Choice: " + emotions[seekBar.getProgress()]);
-        timertext.setText("Time: " + String.valueOf(startTime/1000)+" secs");
+        textView.setText(emotions[seekBar.getProgress()]);
+        timertext.setText(String.valueOf(startTime/1000)+" secs");
 
 
         seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -95,7 +95,7 @@ public class FragmentFour extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                textView.setText("Your Choice: " + emotions[seekBar.getProgress()]);
+                textView.setText(emotions[seekBar.getProgress()]);
                 //Toast.makeText(getActivity().getApplicationContext(), "Stopped tracking seekbar", Toast.LENGTH_SHORT).show();
             }
         });
@@ -148,7 +148,7 @@ public class FragmentFour extends Fragment {
         @Override
         public void onTick(long millisUntilFinished)
         {
-            timertext.setText("Time: " + millisUntilFinished/1000 + " secs");
+            timertext.setText(millisUntilFinished/1000 + " secs");
             timeElapsed = startTime - millisUntilFinished;
         }
     }
