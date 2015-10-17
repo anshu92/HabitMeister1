@@ -43,10 +43,13 @@ public class FragmentFour extends Fragment {
     private TextView textView;
     private TextView timertext;
     private CalibCountDownTimer timer;
-    private final long startTime = 15000;
+    private final long startTime = 10000;
     private final long interval = 1000;
     private long timeElapsed;
     private boolean timerHasStarted = false;
+    private int counter=1;
+    private int fix_cross = R.drawable.fixation;
+
 
     public static Fragment newInstance(Context context) {
     	FragmentFour f = new FragmentFour();
@@ -101,12 +104,12 @@ public class FragmentFour extends Fragment {
         });
 
 
-        Animation in = AnimationUtils.loadAnimation(getActivity(), android.R.anim.slide_in_left);
-        Animation out = AnimationUtils.loadAnimation(getActivity(),android.R.anim.slide_out_right);
+       // Animation in = AnimationUtils.loadAnimation(getActivity(), android.R.anim.slide_in_left);
+        //Animation out = AnimationUtils.loadAnimation(getActivity(),android.R.anim.slide_out_right);
 
         // set the animation type to imageSwitcher
-        sw.setInAnimation(in);
-        sw.setOutAnimation(out);
+        //sw.setInAnimation(in);
+        //sw.setOutAnimation(out);
         final Random r = new Random();
         sw.setImageResource(imageIds[r.nextInt(5 - 0)]);
         timer.start();
@@ -114,12 +117,14 @@ public class FragmentFour extends Fragment {
             int i = 0;
 
             public void run() {
+                counter = 1;
                 sw.setImageResource(imageIds[r.nextInt(5 - 0)]);
-                sw.postDelayed(this, 16000);
+                sw.postDelayed(this, 11000);
                 timer.start();
-
             }
-        }, 16000);
+
+
+        }, 11000);
 
     }
 
@@ -148,7 +153,18 @@ public class FragmentFour extends Fragment {
         @Override
         public void onTick(long millisUntilFinished)
         {
-            timertext.setText(millisUntilFinished/1000 + " secs");
+            if(counter++ == 3) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sw.setImageDrawable(null);
+
+                    }
+                });
+
+            }
+
+            timertext.setText(millisUntilFinished / 1000 + " secs");
             timeElapsed = startTime - millisUntilFinished;
         }
     }

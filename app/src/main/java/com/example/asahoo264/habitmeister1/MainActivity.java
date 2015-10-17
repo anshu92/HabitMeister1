@@ -47,6 +47,9 @@ import java.util.List;
 
 public class MainActivity extends Activity implements FragmentOne.update_conn_status, OnClickListener {
 
+
+
+
 	/**
 	 * Connection listener updates UI with new connection status and logs it.
 	 */
@@ -62,7 +65,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 		public void receiveMuseConnectionPacket(MuseConnectionPacket p) {
 
             final ConnectionState current = p.getCurrentConnectionState();
-            final String status = p.getPreviousConnectionState().toString() +
+            status = p.getPreviousConnectionState().toString() +
                     " -> " + current;
             final String full = "Muse " + p.getSource().getMacAddress() +
                     " " + status;
@@ -78,7 +81,10 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
                     public void run() {
                         TextView statusText =
                                 (TextView) findViewById(R.id.con_status);
-                        statusText.setText(status);
+
+						if(statusText != null)
+                        	statusText.setText(status);
+
 //                       TextView museVersionText =
 //                               (TextView) findViewById(R.id.version);
 //                        if (current == ConnectionState.CONNECTED) {
@@ -117,6 +123,9 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
 			@Override
 			public void receiveMuseDataPacket(MuseDataPacket p) {
+
+
+
 				switch (p.getPacketType()) {
 					case EEG:
 						updateEeg(p.getValues());
@@ -324,8 +333,9 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
     private boolean dataTransmission = true;
     private MuseFileWriter fileWriter = null;
     private int clench_count = 0;
+	public static String status = null;
 
-    public MainActivity() {
+	public MainActivity() {
         // Create listeners and pass reference to activity to them
         WeakReference<Activity> weakActivity =
                 new WeakReference<Activity>(this);
