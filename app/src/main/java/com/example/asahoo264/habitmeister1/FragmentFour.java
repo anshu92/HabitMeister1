@@ -1,13 +1,21 @@
 package com.example.asahoo264.habitmeister1;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.app.Activity;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,12 +30,16 @@ import android.widget.ViewSwitcher.ViewFactory;
 import android.app.ActionBar.LayoutParams;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Random;
 
 
 public class FragmentFour extends Fragment {
 
     private ImageSwitcher sw;
+    private final Random r = new Random();
+    private Bitmap bitmap;
     public static int id = 4;
     private  int imageIds[]={R.drawable.a001,R.drawable.a001,R.drawable.n001,R.drawable.sp001,R.drawable.sn001,R.drawable.p001};
     private String[] emotions = {
@@ -851,8 +863,13 @@ public class FragmentFour extends Fragment {
         // set the animation type to imageSwitcher
         //sw.setInAnimation(in);
         //sw.setOutAnimation(out);
-        final Random r = new Random();
-        sw.setImageURI(Uri.parse(urls[r.nextInt(5 - 0)]));
+
+       new LoadImage().execute(urls[r.nextInt(urls.length - 1)]);
+
+                Drawable image  = new BitmapDrawable(getResources(),bitmap);
+            sw.setImageDrawable(image);
+            sw.setFitsSystemWindows(true);
+
         timer.start();
         ((MainActivity)getActivity()).start_recording = true;
         sw.postDelayed(new Runnable() {
@@ -865,8 +882,11 @@ public class FragmentFour extends Fragment {
                     return;
                 }
                 counter = 1;
-                sw.setImageURI(Uri.parse(urls[r.nextInt(5 - 0)]));
-                sw.postDelayed(this, 11000);
+                    Drawable image  = new BitmapDrawable(getResources(), bitmap);
+                    sw.setImageDrawable(image);
+                    sw.setFitsSystemWindows(true);
+
+                    sw.postDelayed(this, 11000);
                 timer.start();
 
             }
@@ -906,6 +926,8 @@ public class FragmentFour extends Fragment {
                     @Override
                     public void run() {
                         sw.setImageDrawable(null);
+                        new LoadImage().execute(urls[r.nextInt(urls.length - 1)]);
+
 
                     }
                 });
@@ -927,6 +949,63 @@ public class FragmentFour extends Fragment {
         }
     }
 
+        private class LoadImage extends AsyncTask<String, String, Bitmap> {
+                @Override
+                protected void onPreExecute() {
+                        super.onPreExecute();
 
+                }
+                protected Bitmap doInBackground(String... args) {
+                        try {
+                                bitmap = BitmapFactory.decodeStream((InputStream)new URL(args[0]).getContent());
+                               bitmap = getResizedBitmap(bitmap,sw.getHeight(),sw.getWidth());
+
+
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                        }
+
+
+                        return bitmap;
+                }
+
+                protected void onPostExecute(Bitmap image) {
+
+                        if(image != null){
+
+
+                        }else{
+
+                                Toast.makeText(getActivity(), "Image Does Not exist or Network Error", Toast.LENGTH_SHORT).show();
+
+                        }
+                }
+        }
+
+
+        public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
+
+                int width = bm.getWidth();
+
+                int height = bm.getHeight();
+
+                float scaleWidth = ((float) newWidth) / width;
+
+                float scaleHeight = ((float) newHeight) / height;
+
+// CREATE A MATRIX FOR THE MANIPULATION
+
+                Matrix matrix = new Matrix();
+
+// RESIZE THE BIT MAP
+
+                matrix.postScale(scaleWidth, scaleHeight);
+
+// RECREATE THE NEW BITMAP
+
+                Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+                return resizedBitmap;
+
+        }
 
 }
