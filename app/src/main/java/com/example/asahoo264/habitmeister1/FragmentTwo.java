@@ -2,6 +2,7 @@ package com.example.asahoo264.habitmeister1;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
@@ -34,6 +35,16 @@ public class FragmentTwo extends Fragment {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_two, null);
         return root;
     }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(isVisibleToUser) {
+            Activity a = getActivity();
+            if(a != null) a.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+    }
+
 
 
 }

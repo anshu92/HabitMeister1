@@ -3,6 +3,7 @@ package com.example.asahoo264.habitmeister1;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.ContactsContract;
 import android.app.Fragment;
 //import android.support.v4.app.FragmentActivity;
@@ -24,6 +25,7 @@ import com.interaxon.libmuse.AnnotationData;
 import com.interaxon.libmuse.ConnectionState;
 import com.interaxon.libmuse.Eeg;
 import com.interaxon.libmuse.LibMuseVersion;
+import com.interaxon.libmuse.MessageType;
 import com.interaxon.libmuse.Muse;
 import com.interaxon.libmuse.MuseArtifactPacket;
 import com.interaxon.libmuse.MuseConfiguration;
@@ -32,6 +34,8 @@ import com.interaxon.libmuse.MuseConnectionPacket;
 import com.interaxon.libmuse.MuseDataListener;
 import com.interaxon.libmuse.MuseDataPacket;
 import com.interaxon.libmuse.MuseDataPacketType;
+import com.interaxon.libmuse.MuseFileFactory;
+import com.interaxon.libmuse.MuseFileReader;
 import com.interaxon.libmuse.MuseFileWriter;
 import com.interaxon.libmuse.MuseManager;
 import com.interaxon.libmuse.MusePreset;
@@ -40,6 +44,7 @@ import com.interaxon.libmuse.MuseVersion;
 import android.view.View.OnClickListener;
 
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,18 +90,18 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 						if(statusText != null)
                         	statusText.setText(status);
 
-//                       TextView museVersionText =
-//                               (TextView) findViewById(R.id.version);
-//                        if (current == ConnectionState.CONNECTED) {
-//                            MuseVersion museVersion = muse.getMuseVersion();
-//                            String version = museVersion.getFirmwareType() +
-//                                 " - " + museVersion.getFirmwareVersion() +
-//                                 " - " + Integer.toString(
-//                                    museVersion.getProtocolVersion());
-//                            museVersionText.setText(version);
-//                        } else {
-//                            museVersionText.setText(R.string.undefined);
-//                        }
+                       TextView museVersionText =
+                               (TextView) findViewById(R.id.version);
+                        if (current == ConnectionState.CONNECTED) {
+                            MuseVersion museVersion = muse.getMuseVersion();
+                            String version = museVersion.getFirmwareType() +
+                                 " - " + museVersion.getFirmwareVersion() +
+                                 " - " + Integer.toString(
+                                    museVersion.getProtocolVersion());
+                            museVersionText.setText(version);
+                        } else {
+                            museVersionText.setText(R.string.undefined);
+                        }
                     }
                 });
             }
@@ -128,7 +133,8 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
 				switch (p.getPacketType()) {
 					case EEG:
-						updateEeg(p.getValues());
+						updateEeg(p.getValues(),p);
+
 						break;
 					case ACCELEROMETER:
 						updateAccelerometer(p.getValues());
@@ -186,7 +192,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 							TextView acc_x = (TextView) findViewById(R.id.acc_x);
 							TextView acc_y = (TextView) findViewById(R.id.acc_y);
 							TextView acc_z = (TextView) findViewById(R.id.acc_z);
-							if(!(acc_x == null || acc_y == null || acc_z == null)) {
+							if (!(acc_x == null || acc_y == null || acc_z == null)) {
 								acc_x.setText(String.format(
 										"%6.2f", data.get(Accelerometer.FORWARD_BACKWARD.ordinal())));
 								acc_y.setText(String.format(
@@ -199,7 +205,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 				}
 			}
 
-			private void updateEeg(final ArrayList<Double> data) {
+			private void updateEeg(final ArrayList<Double> data, final MuseDataPacket p) {
 				Activity activity = activityRef.get();
 				if (activity != null) {
 					activity.runOnUiThread(new Runnable() {
@@ -222,6 +228,13 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 							}
 						}
 					});
+					if(start_recording){
+					fileWriter.addDataPacket(1,p);
+
+					// It's library client responsibility to flush the buffer,
+					// otherwise you may get memory overflow.
+					if (fileWriter.getBufferedMessagesSize() > 8096)
+						fileWriter.flush();}
 				}
 			}
 
@@ -315,9 +328,9 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 			}
 
 
-			//public void setFileWriter(MuseFileWriter fileWriter) {
-			//   this.fileWriter  = fileWriter;
-			//}
+			public void setFileWriter(MuseFileWriter fileWriter) {
+			   this.fileWriter  = fileWriter;
+			}
 		}
 
     final String[] data = {"Home", "Raw EEG", "Plot","Calibration"};
@@ -334,6 +347,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
     private MuseFileWriter fileWriter = null;
     private int clench_count = 0;
 	public static String status = null;
+	public static  boolean start_recording = false;
 
 	public MainActivity() {
         // Create listeners and pass reference to activity to them
@@ -357,24 +371,32 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
         final ListView navList = (ListView) findViewById(R.id.drawer);
         navList.setAdapter(adapter);
         navList.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int pos, long id) {
-                drawer.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-                    @Override
-                    public void onDrawerClosed(View drawerView) {
-                        super.onDrawerClosed(drawerView);
-                        android.app.FragmentTransaction tx = getFragmentManager().beginTransaction();
-                        tx.replace(R.id.mainframe, android.app.Fragment.instantiate(MainActivity.this, fragments[pos]));
-                        tx.commit();
-                    }
-                });
-                drawer.closeDrawer(navList);
-            }
-        });
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, final int pos, long id) {
+				drawer.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+					@Override
+					public void onDrawerClosed(View drawerView) {
+						super.onDrawerClosed(drawerView);
+						android.app.FragmentTransaction tx = getFragmentManager().beginTransaction();
+						tx.replace(R.id.mainframe, android.app.Fragment.instantiate(MainActivity.this, fragments[pos]));
+						tx.commit();
+					}
+				});
+				drawer.closeDrawer(navList);
+			}
+		});
         android.app.FragmentTransaction tx = getFragmentManager().beginTransaction();
         tx.replace(R.id.mainframe, android.app.Fragment.instantiate(MainActivity.this, fragments[0]));
         tx.commit();
 
+		File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+
+		fileWriter = MuseFileFactory.getMuseFileWriter(
+				new File(dir, "new_muse_file.muse"));
+		Log.i("Muse Headband", "libmuse version=" + LibMuseVersion.SDK_VERSION);
+		Log.i("Muse Headband",dir.getPath());
+		fileWriter.addAnnotationString(1, "MainActivity onCreate");
+		dataListener.setFileWriter(fileWriter);
 
     }
 
@@ -407,13 +429,15 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
                 muse = pairedMuses.get(musesSpinner.getSelectedItemPosition());
                 ConnectionState state = muse.getConnectionState();
-                if (state == ConnectionState.CONNECTED ||
+				if (state == ConnectionState.CONNECTED ||
                         state == ConnectionState.CONNECTING) {
                     Log.w("Muse Headband",
                             "doesn't make sense to connect second time to the same muse");
                     return;
                 }
                 configureLibrary();
+				fileWriter.open();
+				fileWriter.addAnnotationString(1, "Connect clicked");
 
                 /**
                  * In most cases libmuse native library takes care about
@@ -440,6 +464,9 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
                  * muse.disconnect(false);
                  */
                 muse.disconnect(true);
+				fileWriter.addAnnotationString(1, "Disconnect clicked");
+				fileWriter.flush();
+				fileWriter.close();
 
             }
         }
@@ -470,17 +497,59 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
                 MuseDataPacketType.ARTIFACTS);
         muse.registerDataListener(dataListener,
                 MuseDataPacketType.BATTERY);
-        muse.registerDataListener(dataListener,
+		muse.registerDataListener(dataListener,
                 MuseDataPacketType.MELLOW);
         muse.registerDataListener(dataListener,
-                MuseDataPacketType.CONCENTRATION);
+				MuseDataPacketType.CONCENTRATION);
         muse.setPreset(MusePreset.PRESET_14);
         muse.enableDataTransmission(dataTransmission);
 
     }
 
+	/*
+     * Simple example of getting data from the "*.muse" file
+     */
+	private void playMuseFile(String name) {
+		File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+		File file = new File(dir, name);
+		final String tag = "Muse File Reader";
+		if (!file.exists()) {
+			Log.w(tag, "file doesn't exist");
+			return;
+		}
+		MuseFileReader fileReader = MuseFileFactory.getMuseFileReader(file);
+		while (fileReader.gotoNextMessage()) {
+			MessageType type = fileReader.getMessageType();
+			int id = fileReader.getMessageId();
+			long timestamp = fileReader.getMessageTimestamp();
+			Log.i(tag, "type: " + type.toString() +
+					" id: " + Integer.toString(id) +
+					" timestamp: " + String.valueOf(timestamp));
+			switch(type) {
+				case EEG: case BATTERY: case ACCELEROMETER: case QUANTIZATION:
+					MuseDataPacket packet = fileReader.getDataPacket();
+					Log.i(tag, "data packet: " + packet.getPacketType().toString());
+					break;
+				case VERSION:
+					MuseVersion version = fileReader.getVersion();
+					Log.i(tag, "version" + version.getFirmwareType());
+					break;
+				case CONFIGURATION:
+					MuseConfiguration config = fileReader.getConfiguration();
+					Log.i(tag, "config" + config.getBluetoothMac());
+					break;
+				case ANNOTATION:
+					AnnotationData annotation = fileReader.getAnnotation();
+					Log.i(tag, "annotation" + annotation.getData());
+					break;
+				default:
+					break;
+			}
+		}
+	}
 
-    public ConnectionListener getConnectionListener() {
+
+	public ConnectionListener getConnectionListener() {
 
 			return connectionListener;
 		}

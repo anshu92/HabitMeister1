@@ -1,6 +1,7 @@
 package com.example.asahoo264.habitmeister1;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -48,6 +49,9 @@ public class FragmentFour extends Fragment {
     private long timeElapsed;
     private boolean timerHasStarted = false;
     private int counter=1;
+    private int counter1=1;
+    private int number_images = 10;
+
     private int fix_cross = R.drawable.fixation;
 
 
@@ -88,7 +92,7 @@ public class FragmentFour extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser) {
                 progress = progressValue;
-               // Toast.makeText(getActivity().getApplicationContext(), "Changing seekbar's progress", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getActivity().getApplicationContext(), "Changing seekbar's progress", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -113,14 +117,21 @@ public class FragmentFour extends Fragment {
         final Random r = new Random();
         sw.setImageResource(imageIds[r.nextInt(5 - 0)]);
         timer.start();
+        ((MainActivity)getActivity()).start_recording = true;
         sw.postDelayed(new Runnable() {
             int i = 0;
 
             public void run() {
+                if(counter1++ > number_images - 1){
+                    counter1 = 1;
+                    ((MainActivity)getActivity()).start_recording = false;
+                    return;
+                }
                 counter = 1;
                 sw.setImageResource(imageIds[r.nextInt(5 - 0)]);
                 sw.postDelayed(this, 11000);
                 timer.start();
+
             }
 
 
@@ -153,7 +164,7 @@ public class FragmentFour extends Fragment {
         @Override
         public void onTick(long millisUntilFinished)
         {
-            if(counter++ == 3) {
+            if(counter++ == 2) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -168,4 +179,17 @@ public class FragmentFour extends Fragment {
             timeElapsed = startTime - millisUntilFinished;
         }
     }
+
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(isVisibleToUser) {
+            Activity a = getActivity();
+            if(a != null) a.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+    }
+
+
+
 }
