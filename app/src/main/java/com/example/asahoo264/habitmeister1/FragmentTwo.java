@@ -44,7 +44,4 @@ public class FragmentTwo extends Fragment {
             if(a != null) a.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
     }
-
-
-
 }

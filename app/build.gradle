@@ -1,5 +1,33 @@
-apply plugin: 'com.android.application'
+//apply plugin: 'com.android.application'
+apply plugin: 'android'
 
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    //testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:design:22.2.1'
+    compile files('libs/libmuseandroid.jar')
+    compile 'org.apache.httpcomponents:httpclient:4.5.1'
+    //compile 'tw.edu.ntu.csie:libsvm:3.17'
+    compile files('libs/libsvm.jar')
+    compile 'com.jjoe64:graphview:4.0.1'
+    //compile ('com.parse:parse-android:1.11.0') { exclude group: 'com.parse.bolts', module: 'bolts-tasks'; }
+    //compile 'org.robolectric:shadows-multidex:3.0'
+    //compile 'com.android.support:multidex:1.0.0'
+}
+/*
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:design:22.2.1'
+    compile files('libs/libmuseandroid.jar')
+    compile 'org.apache.httpcomponents:httpclient:4.5.1'
+    compile 'com.jjoe64:graphview:4.0.1'
+
+}
+*/
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
@@ -10,6 +38,7 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+        //multiDexEnabled true
     }
     buildTypes {
         release {
@@ -17,14 +46,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-}
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:22.2.1'
-    compile 'com.android.support:design:22.2.1'
-    compile files('libs/libmuseandroid.jar')
-    compile 'org.apache.httpcomponents:httpclient:4.5.1'
-    compile 'com.jjoe64:graphview:4.0.1'
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LGPL2.1'
+    }
 }
+//configurations { all*.exclude group: 'com.android.support', module: 'support-v4' }

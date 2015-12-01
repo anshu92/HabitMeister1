@@ -52,7 +52,7 @@ import java.util.List;
 
 public class MainActivity extends Activity implements FragmentOne.update_conn_status, OnClickListener {
 
-
+	public static final boolean ON_PHONE = false;
 
 
 	/**
@@ -228,13 +228,17 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 							}
 						}
 					});
-					if(start_recording){
-					fileWriter.addDataPacket(1,p);
 
-					// It's library client responsibility to flush the buffer,
-					// otherwise you may get memory overflow.
-					if (fileWriter.getBufferedMessagesSize() > 8096)
-						fileWriter.flush();}
+					if(ON_PHONE) {
+						if (start_recording) {
+							fileWriter.addDataPacket(1, p);
+
+							// It's library client responsibility to flush the buffer,
+							// otherwise you may get memory overflow.
+							if (fileWriter.getBufferedMessagesSize() > 8096)
+								fileWriter.flush();
+						}
+					}
 				}
 			}
 
@@ -291,7 +295,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 						@Override
 						public void run() {
 							TextView concentration = (TextView) findViewById(R.id.concentration);
-							if(concentration != null) {
+							if (concentration != null) {
 								double n = 100 * data.get(0);
 								concentration.setText(String.format(
 										"%4.2f", n));
@@ -333,12 +337,13 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 			}
 		}
 
-    final String[] data = {"Home", "Raw EEG", "Plot","Calibration"};
+    final String[] data = {"Home", "Raw EEG", "Plot","Calibration", "SVM"};
     final String[] fragments = {
             "com.example.asahoo264.habitmeister1.FragmentOne",
             "com.example.asahoo264.habitmeister1.FragmentTwo",
             "com.example.asahoo264.habitmeister1.FragmentThree",
-            "com.example.asahoo264.habitmeister1.FragmentFour"
+            "com.example.asahoo264.habitmeister1.FragmentFour",
+			"com.example.asahoo264.habitmeister1.FragmentFive"
     };
     private Muse muse = null;
     public static ConnectionListener connectionListener = null;
@@ -390,14 +395,14 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
         tx.commit();
 
 		File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-
-		fileWriter = MuseFileFactory.getMuseFileWriter(
-				new File(dir, "new_muse_file.muse"));
-		Log.i("Muse Headband", "libmuse version=" + LibMuseVersion.SDK_VERSION);
-		Log.i("Muse Headband",dir.getPath());
-		fileWriter.addAnnotationString(1, "MainActivity onCreate");
-		dataListener.setFileWriter(fileWriter);
-
+		if(ON_PHONE) {
+			fileWriter = MuseFileFactory.getMuseFileWriter(
+					new File(dir, "new_muse_file.muse"));
+			Log.i("Muse Headband", "libmuse version=" + LibMuseVersion.SDK_VERSION);
+			Log.i("Muse Headband", dir.getPath());
+			fileWriter.addAnnotationString(1, "MainActivity onCreate");
+			dataListener.setFileWriter(fileWriter);
+		}
     }
 
 
@@ -436,9 +441,10 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
                     return;
                 }
                 configureLibrary();
-				fileWriter.open();
-				fileWriter.addAnnotationString(1, "Connect clicked");
-
+				if(ON_PHONE) {
+					fileWriter.open();
+					fileWriter.addAnnotationString(1, "Connect clicked");
+				}
                 /**
                  * In most cases libmuse native library takes care about
                  * exceptions and recovery mechanism, but native code still
@@ -464,10 +470,11 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
                  * muse.disconnect(false);
                  */
                 muse.disconnect(true);
-				fileWriter.addAnnotationString(1, "Disconnect clicked");
-				fileWriter.flush();
-				fileWriter.close();
-
+				if(ON_PHONE) {
+					fileWriter.addAnnotationString(1, "Disconnect clicked");
+					fileWriter.flush();
+					fileWriter.close();
+				}
             }
         }
 
