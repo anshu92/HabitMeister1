@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/scaling1"
-        android:layout_weight="0.20"
+        android:layout_weight="0.16"
         android:textAlignment="center"
         android:textIsSelectable="false" />
 
@@ -44,18 +44,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/scaling2"
-        android:layout_weight="0.2" />
+        android:layout_weight="0.16" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/training"
-        android:layout_weight="0.2"
+        android:layout_weight="0.16"
         android:textAlignment="center" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/testing"
-        android:layout_weight="0.20" />
+        android:layout_weight="0.16" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/result"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.16" />
 </LinearLayout>

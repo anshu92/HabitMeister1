@@ -22,6 +22,7 @@ import com.interaxon.libmuse.MuseManager;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileReader;
@@ -432,9 +433,17 @@ class svm_predict {
                             ((total*sumvv-sumv*sumv)*(total*sumyy-sumy*sumy))+
                     " (regression)\n");
         }
-        else
-            svm_predict.info("Accuracy = "+(double)correct/total*100+
-                    "% ("+correct+"/"+total+") (classification)\n");
+        else {
+            svm_predict.info("Accuracy = " + (double) correct / total * 100 +
+                    "% (" + correct + "/" + total + ") (classification)\n");
+            String accuracy = "/sdcard/accuracy";
+            File file = new File(accuracy);
+            FileOutputStream f = new FileOutputStream(file);
+
+            String content = ("Accuracy = " + (double) correct / total * 100 + "% (" + correct + "/" + total + ") (classification)\n");
+            byte[] b = content.getBytes();
+            f.write(b);
+        }
     }
 
     private static void exit_with_help()
@@ -988,9 +997,23 @@ public class FragmentFive extends Fragment implements View.OnClickListener {
             try {
                 //svm_problem prob = new svm_problem();
                 TextView testing_f = (TextView) (getActivity()).findViewById(R.id.testing);
+                TextView result = (TextView) (getActivity()).findViewById(R.id.result);
                 testing_f.setText("testing started...");
                 svm_predict.main(testing2);
                 testing_f.setText("testing finished");
+                String accuracy = "/sdcard/accuracy";
+                BufferedReader input = null;
+                try
+                {
+                    input = new BufferedReader(new FileReader(accuracy));
+                }catch (Exception e) {
+                    System.err.println("can't open input file ");
+                    System.exit(1);
+                }
+
+                String input_ = input.readLine();
+                System.out.println(input_);
+                result.setText("print result: " + input_);
                 //svm_predict.main(testing);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
