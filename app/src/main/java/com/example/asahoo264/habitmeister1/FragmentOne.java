@@ -53,11 +53,11 @@ public class FragmentOne extends Fragment{
 
         private boolean dataTransmission = true;
         private int clench_count = 0;
-        public static MainActivity.ConnectionListener connectionListener = null;
-        public static MainActivity.DataListener dataListener = null;
+       // public static MainActivity.ConnectionListener connectionListener = null;
+        //public static MainActivity.DataListener dataListener = null;
         public static int id = 1;
 
-        update_conn_status mconnstatus = null;
+        public static update_conn_status mconnstatus = null;
 
 
         interface  update_conn_status{
@@ -109,6 +109,8 @@ public class FragmentOne extends Fragment{
         Button refreshButton = (Button) root.findViewById(R.id.refresh);
         Button connectButton = (Button) root.findViewById(R.id.connect);
         Button disconnectButton = (Button) root.findViewById(R.id.disconnect);
+        ((MainActivity)getActivity()).updating_conn = true;
+
 
         mconnstatus.setonclickstuff(refreshButton,connectButton,disconnectButton);
 
@@ -141,6 +143,52 @@ public class FragmentOne extends Fragment{
     }
 
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        ((MainActivity)getActivity()).updating_conn = true;
+        final String status = ((MainActivity)getActivity()).previous_connection_state +
+                " -> " + ((MainActivity)getActivity()).connection_state;
+
+        final Activity activity = ((MainActivity)getActivity());
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    Spinner musesSpinner = (Spinner) activity.findViewById(R.id.muses_spinner);
+                    musesSpinner.setAdapter(((MainActivity)getActivity()).adapterArray_status);
+
+                    TextView statusText =
+                            (TextView) activity.findViewById(R.id.con_status);
+
+                    if(statusText != null)
+                        statusText.setText(status);
+
+                    TextView museVersionText =
+                            (TextView) activity.findViewById(R.id.version);
+                    if (((MainActivity)getActivity()).connection_state == ConnectionState.CONNECTED) {
+                        MuseVersion museVersion = ((MainActivity)getActivity()).muse.getMuseVersion();
+                        String version = museVersion.getFirmwareType() +
+                                " - " + museVersion.getFirmwareVersion() +
+                                " - " + Integer.toString(
+                                museVersion.getProtocolVersion());
+                        museVersionText.setText(version);
+                    } else {
+                        museVersionText.setText(R.string.undefined);
+                    }
+                }
+            });
+        }
+
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        ((MainActivity)getActivity()).updating_conn = false;
 
 
+    }
 }

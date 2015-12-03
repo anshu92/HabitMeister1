@@ -61,6 +61,7 @@ class ReadFileService extends AsyncTask<String, String, Boolean> {
         MuseFileReader fileReader = MuseFileFactory.getMuseFileReader(file);
 
         while (fileReader.gotoNextMessage()) {
+
             MessageType type = fileReader.getMessageType();
             int id = fileReader.getMessageId();
             long timestamp = fileReader.getMessageTimestamp();
@@ -178,6 +179,8 @@ class ReadFileService extends AsyncTask<String, String, Boolean> {
                     graphData(Arrays.copyOfRange(temp_fp2, (counter-1)*128, counter*128), graph3);
                     graphData(Arrays.copyOfRange(temp_tp10,(counter-1)*128, counter*128), graph4);
                     counter++;
+                    if(isCancelled())
+                        return;
                 }
                         graph1.getViewport().setMinX((counter - 2) * 128);
                         graph1.getViewport().setMaxX((counter - 1) * 128);

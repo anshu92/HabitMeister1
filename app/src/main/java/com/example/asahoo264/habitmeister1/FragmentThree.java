@@ -33,7 +33,7 @@ public class FragmentThree extends Fragment {
 
     public static int id = 3;
     public static String name = "new_muse_file.muse";
-
+    public static ReadFileService ReadFile;
 
     public static Fragment newInstance(Context context) {
     	FragmentThree f = new FragmentThree();
@@ -45,7 +45,7 @@ public class FragmentThree extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_three, null);
 
-        ReadFileService ReadFile = new ReadFileService(getActivity(),name);
+        ReadFile = new ReadFileService(getActivity(),name);
         ReadFile.execute("");
         return root;
     }
@@ -58,6 +58,13 @@ public class FragmentThree extends Fragment {
             Activity a = getActivity();
             if(a != null) a.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+
+        ReadFile.cancel(true);
     }
 
 }

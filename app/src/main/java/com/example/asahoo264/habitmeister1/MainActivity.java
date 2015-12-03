@@ -42,6 +42,7 @@ import com.interaxon.libmuse.MusePreset;
 import com.interaxon.libmuse.MuseVersion;
 
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 
 import java.io.File;
@@ -50,12 +51,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends Activity implements FragmentOne.update_conn_status, OnClickListener {
+public class MainActivity extends Activity implements FragmentOne.update_conn_status,OnClickListener {
 
 	public static final boolean ON_PHONE = false;
+	public static long[] event_timestamps = new long[10];
+	public static int event_counter = 0;
+    public static  boolean start_recording = false;
+    public static  boolean updating_data = false;
+    public static  boolean updating_conn = false;
+    public static ConnectionState connection_state = null;
+    public static ConnectionState previous_connection_state = null;
+    public static int[] epoch_num = new int[10];
 
 
-	/**
+
+    /**
 	 * Connection listener updates UI with new connection status and logs it.
 	 */
 	class ConnectionListener extends MuseConnectionListener {
@@ -70,17 +80,20 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 		public void receiveMuseConnectionPacket(MuseConnectionPacket p) {
 
             final ConnectionState current = p.getCurrentConnectionState();
+            connection_state = current;
+            previous_connection_state = p.getPreviousConnectionState();
             status = p.getPreviousConnectionState().toString() +
                     " -> " + current;
             final String full = "Muse " + p.getSource().getMacAddress() +
                     " " + status;
+
             Log.i("Muse Headband", full);
             Activity activity = activityRef.get();
             // UI thread is used here only because we need to update
             // TextView values. You don't have to use another thread, unless
             // you want to run disconnect() or connect() from connection packet
             // handler. In this case creating another thread is required.
-            if (activity != null) {
+            if (activity != null && updating_conn) {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -185,7 +198,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
 			private void updateAccelerometer(final ArrayList<Double> data) {
 				Activity activity = activityRef.get();
-				if (activity != null ) {
+				if (activity != null && updating_data ) {
 					activity.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -207,7 +220,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
 			private void updateEeg(final ArrayList<Double> data, final MuseDataPacket p) {
 				Activity activity = activityRef.get();
-				if (activity != null) {
+				if (activity != null && updating_data) {
 					activity.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -232,9 +245,9 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 					if(ON_PHONE) {
 						if (start_recording) {
 							fileWriter.addDataPacket(1, p);
+							event_timestamps[event_counter++] = p.getTimestamp();
 
 							// It's library client responsibility to flush the buffer,
-							// otherwise you may get memory overflow.
 							if (fileWriter.getBufferedMessagesSize() > 8096)
 								fileWriter.flush();
 						}
@@ -244,7 +257,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
 			private void updateAlphaRelative(final ArrayList<Double> data) {
 				Activity activity = activityRef.get();
-				if (activity != null ) {
+				if (activity != null && updating_data ) {
 					activity.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -271,7 +284,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 			private void updateMellow(final ArrayList<Double> data) {
 				Activity activity = activityRef.get();
 
-				if (activity != null ) {
+				if (activity != null && updating_data ) {
 					activity.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -290,7 +303,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
 			private void updateConcentration(final ArrayList<Double> data) {
 				Activity activity = activityRef.get();
-				if (activity != null ) {
+				if (activity != null && updating_data ) {
 					activity.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -309,7 +322,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 			private void updateBlinkJaw( final boolean blink, final boolean jaw) {
 				Activity activity = activityRef.get();
 
-				if (activity != null ) {
+				if (activity != null && updating_data) {
 					activity.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -345,14 +358,15 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
             "com.example.asahoo264.habitmeister1.FragmentFour",
 			"com.example.asahoo264.habitmeister1.FragmentFive"
     };
-    private Muse muse = null;
+    public Muse muse = null;
     public static ConnectionListener connectionListener = null;
     public static DataListener dataListener = null;
     private boolean dataTransmission = true;
     private MuseFileWriter fileWriter = null;
     private int clench_count = 0;
 	public static String status = null;
-	public static  boolean start_recording = false;
+    public static ArrayAdapter<String> adapterArray_status = null;
+
 
 	public MainActivity() {
         // Create listeners and pass reference to activity to them
@@ -407,7 +421,6 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
 
 
-
     @Override
     public void onClick(View v) {
         Spinner musesSpinner = (Spinner) findViewById(R.id.muses_spinner);
@@ -422,6 +435,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
             }
             ArrayAdapter<String> adapterArray = new ArrayAdapter<String> (
                     this, android.R.layout.simple_spinner_item, spinnerItems);
+            adapterArray_status = adapterArray;
             musesSpinner.setAdapter(adapterArray);
         }
         else if (v.getId() == R.id.connect) {
@@ -490,6 +504,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
         refreshButton.setOnClickListener(this);
 
     }
+
 
     public void configureLibrary() {
 

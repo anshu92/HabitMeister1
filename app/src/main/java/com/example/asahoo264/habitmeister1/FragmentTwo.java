@@ -33,6 +33,7 @@ public class FragmentTwo extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_two, null);
+        ((MainActivity)getActivity()).updating_data = true;
         return root;
     }
 
@@ -43,5 +44,15 @@ public class FragmentTwo extends Fragment {
             Activity a = getActivity();
             if(a != null) a.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
+    }
+
+    @Override
+    public void onStop(){
+
+        super.onStop();
+
+        ((MainActivity)getActivity()).updating_data = false;
+
+
     }
 }
