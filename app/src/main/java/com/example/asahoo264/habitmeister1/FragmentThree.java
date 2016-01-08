@@ -45,7 +45,14 @@ public class FragmentThree extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_three, null);
 
-        ReadFile = new ReadFileService(getActivity(),name);
+
+        File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        String dir_str = dir.toString();
+
+        String muse = dir_str + name;
+
+        ReadFileService ReadFile = new ReadFileService(getActivity(),muse);
+
         ReadFile.execute("");
         return root;
     }
