@@ -53,8 +53,6 @@ import java.util.List;
 
 public class MainActivity extends Activity implements FragmentOne.update_conn_status,OnClickListener {
 
-<<<<<<< Updated upstream
-	public static final boolean ON_PHONE = false;
 	public static long[] event_timestamps = new long[10];
 	public static int event_counter = 0;
     public static  boolean start_recording = false;
@@ -63,10 +61,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
     public static ConnectionState connection_state = null;
     public static ConnectionState previous_connection_state = null;
     public static int[] epoch_num = new int[10];
-=======
 	public static final boolean ON_PHONE = true;
->>>>>>> Stashed changes
-
 
 
     /**
