@@ -1000,6 +1000,17 @@ public class FragmentFour extends Fragment {
         }
 
 
+        @Override
+        public void onStop(){
+
+                super.onStop();
+
+                timer.cancel();
+
+
+
+        }
+
         public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
 
                 int width = bm.getWidth();
