@@ -1,6 +1,7 @@
 package com.example.asahoo264.habitmeister1;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
@@ -45,10 +46,17 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.Context.MODE_APPEND;
 
 
 public class MainActivity extends Activity implements FragmentOne.update_conn_status,OnClickListener {
@@ -56,13 +64,119 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 	public static long[] event_timestamps = new long[10];
 	public static int event_counter = 0;
     public static  boolean start_recording = false;
+	public static boolean start_of_event = false;
     public static  boolean updating_data = false;
     public static  boolean updating_conn = false;
     public static ConnectionState connection_state = null;
     public static ConnectionState previous_connection_state = null;
     public static int[] epoch_num = new int[10];
 	public static final boolean ON_PHONE = true;
+	public static double[] alpha_val = new double[150];
+	public static double[] beta_val = new double[150];
+	public static double[] gamma_val = new double[150];
+	public static double[] theta_val = new double[150];
+	public static int alpha_cnt = 0;
+	public static int beta_cnt = 0;
+	public static int gamma_cnt = 0;
+	public static int theta_cnt = 0;
 
+
+	public void register_event(boolean is_train, int seekbar_progress) throws IOException {
+		double alpha_sum = 0;
+		double alpha_var_sum = 0;
+		double alpha_mean;
+		double alpha_var;
+		for(int i = 0; i < alpha_val.length;i++){
+			alpha_sum  =  alpha_sum +  alpha_val[i];
+		}
+		alpha_mean = alpha_sum/alpha_cnt;
+		for(int i = 0; i < alpha_val.length;i++){
+			alpha_var_sum  =  alpha_var_sum +  (alpha_val[i]-alpha_mean)*(alpha_val[i]-alpha_mean);
+		}
+		alpha_var = alpha_var_sum/alpha_cnt;
+
+		double beta_sum = 0;
+		double beta_var_sum = 0;
+		double beta_mean;
+		double beta_var;
+		for(int i = 0; i < beta_val.length;i++){
+			beta_sum  =  beta_sum +  beta_val[i];
+		}
+		beta_mean = beta_sum/beta_cnt;
+		for(int i = 0; i < beta_val.length;i++){
+			beta_var_sum  =  beta_var_sum +  (beta_val[i]-beta_mean)*(beta_val[i]-beta_mean);
+		}
+		beta_var = beta_var_sum/beta_cnt;
+
+		double gamma_sum = 0;
+		double gamma_var_sum = 0;
+		double gamma_mean;
+		double gamma_var;
+		for(int i = 0; i < gamma_val.length;i++){
+			gamma_sum  =  gamma_sum +  gamma_val[i];
+		}
+		gamma_mean = gamma_sum/gamma_cnt;
+		for(int i = 0; i < gamma_val.length;i++){
+			gamma_var_sum  =  gamma_var_sum +  (gamma_val[i]-gamma_mean)*(gamma_val[i]-gamma_mean);
+		}
+		gamma_var = gamma_var_sum/gamma_cnt;
+
+
+		double theta_sum = 0;
+		double theta_var_sum = 0;
+		double theta_mean;
+		double theta_var;
+		for(int i = 0; i < theta_val.length;i++){
+			theta_sum  =  theta_sum +  theta_val[i];
+		}
+		theta_mean = theta_sum/theta_cnt;
+		for(int i = 0; i < theta_val.length;i++){
+			theta_var_sum  =  theta_var_sum +  (theta_val[i]-theta_mean)*(theta_val[i]-theta_mean);
+		}
+		theta_var = theta_var_sum/theta_cnt;
+
+		int emotion_label;
+		if(seekbar_progress > 2)
+			emotion_label = 1;
+		else
+			emotion_label = 0;
+
+		String fname;
+		String fcontent;
+
+		if(is_train)
+			fname = "svminput.t";
+		else
+			fname = "svminput";
+
+		String fpath = "/sdcard/"+fname;
+
+		File file = new File(fpath);
+
+		// If file does not exists, then create it
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+
+		try {
+			fcontent = String.valueOf(emotion_label) + " 1:" + String.valueOf(alpha_var) + " 2:" + String.valueOf(beta_var)  + " 3:" + String.valueOf(gamma_var) + " 4:"  +  String.valueOf(theta_var) + "\n";
+			Toast.makeText(this, fcontent, Toast.LENGTH_SHORT).show();
+
+			FileOutputStream fOut = new FileOutputStream(file,true);
+			OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+			myOutWriter.append(fcontent);
+			myOutWriter.flush();
+			myOutWriter.close();
+			fOut.close();
+
+
+
+		} catch (IOException e) {
+			e.printStackTrace();
+
+		}
+
+	}
 
     /**
 	 * Connection listener updates UI with new connection status and logs it.
@@ -168,6 +282,18 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 					case CONCENTRATION:
 						updateConcentration(p.getValues());
 						break;
+					case ALPHA_ABSOLUTE:
+						updateAlphaAbsolute(p.getValues());
+						break;
+					case BETA_ABSOLUTE:
+						updateBetaAbsolute(p.getValues());
+						break;
+					case GAMMA_ABSOLUTE:
+						updateGammaAbsolute(p.getValues());
+						break;
+					case THETA_ABSOLUTE:
+						updateThetaAbsolute(p.getValues());
+						break;
 
 					default:
 						break;
@@ -250,7 +376,58 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 							if (fileWriter.getBufferedMessagesSize() > 8096)
 								fileWriter.flush();
 						}
+
+
 					}
+				}
+			}
+
+
+			private void updateAlphaAbsolute(final ArrayList<Double> data) {
+				Activity activity = activityRef.get();
+				double n = data.get(0);
+				if (activity != null && start_of_event ) {
+					alpha_val[alpha_cnt++] = n;
+				}
+				else {
+					alpha_cnt = 0;
+
+				}
+			}
+
+			private void updateBetaAbsolute(final ArrayList<Double> data) {
+				Activity activity = activityRef.get();
+				double n = data.get(0);
+				if (activity != null && start_of_event ) {
+					beta_val[beta_cnt++] = n;
+				}
+				else {
+					beta_cnt = 0;
+
+				}
+			}
+
+			private void updateGammaAbsolute(final ArrayList<Double> data) {
+				Activity activity = activityRef.get();
+				double n = data.get(0);
+				if (activity != null && start_of_event ) {
+					gamma_val[gamma_cnt++] = n;
+				}
+				else {
+					gamma_cnt = 0;
+
+				}
+			}
+
+			private void updateThetaAbsolute(final ArrayList<Double> data) {
+				Activity activity = activityRef.get();
+				double n = data.get(0);
+				if (activity != null && start_of_event ) {
+					theta_val[theta_cnt++] = n;
+				}
+				else {
+					theta_cnt = 0;
+
 				}
 			}
 
@@ -509,11 +686,19 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
         muse.registerConnectionListener(connectionListener);
         muse.registerDataListener(dataListener,
-                MuseDataPacketType.ACCELEROMETER);
+				MuseDataPacketType.ACCELEROMETER);
         muse.registerDataListener(dataListener,
                 MuseDataPacketType.EEG);
         muse.registerDataListener(dataListener,
                 MuseDataPacketType.ALPHA_RELATIVE);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.ALPHA_ABSOLUTE);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.BETA_ABSOLUTE);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.GAMMA_ABSOLUTE);
+		muse.registerDataListener(dataListener,
+				MuseDataPacketType.THETA_ABSOLUTE);
         muse.registerDataListener(dataListener,
                 MuseDataPacketType.ARTIFACTS);
         muse.registerDataListener(dataListener,

@@ -30,6 +30,7 @@ import android.widget.ViewSwitcher.ViewFactory;
 import android.app.ActionBar.LayoutParams;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Random;
@@ -799,7 +800,8 @@ public class FragmentFour extends Fragment {
     private boolean timerHasStarted = false;
     private int counter=1;
     private int counter1=1;
-    private int number_images = 10;
+        private boolean is_train = true;
+        private int number_images = 10;
 
     private int fix_cross = R.drawable.fixation;
 
@@ -875,17 +877,33 @@ public class FragmentFour extends Fragment {
         sw.postDelayed(new Runnable() {
             int i = 0;
 
-            public void run() {
+
+                public void run() {
                 if(counter1++ > number_images - 1){
                     counter1 = 1;
                     ((MainActivity)getActivity()).start_recording = false;
                     return;
                 }
                 counter = 1;
+                    if(counter1 > 0.5 * number_images ) {
+                            is_train = false;
+                    }
+                    else {
+                            is_train = true;
+                    }
+
+                    if(counter1 > 1) {
+                            try {
+                                    ((MainActivity) getActivity()).register_event(is_train, seekBar.getProgress());
+                            } catch (IOException e) {
+                                    e.printStackTrace();
+                            }
+                    }
+                        ((MainActivity)getActivity()).start_of_event = false;
                     Drawable image  = new BitmapDrawable(getResources(), bitmap);
                     sw.setImageDrawable(image);
                     sw.setFitsSystemWindows(true);
-
+                    ((MainActivity)getActivity()).start_of_event = true;
                     sw.postDelayed(this, 11000);
                 timer.start();
 
