@@ -23,12 +23,13 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher.ViewFactory;
 import android.app.ActionBar.LayoutParams;
-import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.Switch;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,13 +45,8 @@ public class FragmentFour extends Fragment {
     public static int id = 4;
     private  int imageIds[]={R.drawable.a001,R.drawable.a001,R.drawable.n001,R.drawable.sp001,R.drawable.sn001,R.drawable.p001};
     private String[] emotions = {
-            "HAPPY",
-            "CONTENT",
-            "CALM",
-            "TIRED",
-            "BORED",
-            "SAD",
-            "UPSET"
+            "PLEASURE",
+            "AVERSION"
     };
 
     private String[] urls = {
@@ -790,7 +786,7 @@ public class FragmentFour extends Fragment {
     private int max_imageid = 730;
     private int min_imageid = 0;
     private int currentIndex=-1;
-    private SeekBar seekBar;
+    private Switch seekBar;
     private TextView textView;
     private TextView timertext;
     private CalibCountDownTimer timer;
@@ -802,6 +798,7 @@ public class FragmentFour extends Fragment {
     private int counter1=1;
         private boolean is_train = true;
         private int number_images = 10;
+        private boolean switch_state = true;
 
     private int fix_cross = R.drawable.fixation;
 
@@ -817,11 +814,26 @@ public class FragmentFour extends Fragment {
 
         super.onStart();
         sw = (ImageSwitcher) (getActivity()).findViewById(R.id.imageSwitcher);
-        seekBar = (SeekBar) (getActivity()).findViewById(R.id.seekBar);
+        seekBar = (Switch) (getActivity()).findViewById(R.id.switchbar);
         textView = (TextView) (getActivity()).findViewById(R.id.progress);
         timertext = (TextView) (getActivity()).findViewById(R.id.timer);
         timer = new CalibCountDownTimer(startTime,interval);
 
+            seekBar.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView,
+                                                 boolean isChecked) {
+
+                            switch_state = isChecked;
+                            if (isChecked)
+                                    textView.setText(emotions[1]);
+                            else
+                                    textView.setText(emotions[0]);
+
+
+                    }
+            });
         sw.setFactory(new ViewFactory() {
             @Override
             public View makeView() {
@@ -832,31 +844,17 @@ public class FragmentFour extends Fragment {
             }
         });
 
+            int index_state = 0;
+        if(switch_state)
+                index_state = 0;
+         else
+                index_state = 1;
+
         // Initialize the textview with '0'
-        textView.setText(emotions[seekBar.getProgress()]);
-        timertext.setText(String.valueOf(startTime/1000)+" secs");
+        textView.setText(emotions[index_state]);
+            timertext.setText(String.valueOf(startTime/1000)+" secs");
 
 
-        seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            int progress = 0;
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser) {
-                progress = progressValue;
-                // Toast.makeText(getActivity().getApplicationContext(), "Changing seekbar's progress", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                //Toast.makeText(getActivity().getApplicationContext(), "Started tracking seekbar", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                textView.setText(emotions[seekBar.getProgress()]);
-                //Toast.makeText(getActivity().getApplicationContext(), "Stopped tracking seekbar", Toast.LENGTH_SHORT).show();
-            }
-        });
 
 
        // Animation in = AnimationUtils.loadAnimation(getActivity(), android.R.anim.slide_in_left);
@@ -866,14 +864,13 @@ public class FragmentFour extends Fragment {
         //sw.setInAnimation(in);
         //sw.setOutAnimation(out);
 
-       new LoadImage().execute(urls[r.nextInt(urls.length - 1)]);
 
-                Drawable image  = new BitmapDrawable(getResources(),bitmap);
-            sw.setImageDrawable(image);
+            Drawable image  = new BitmapDrawable(getResources(),bitmap);
+            new LoadImage().execute(urls[r.nextInt(urls.length - 1)]);
+            sw.setImageResource(R.drawable.calibration_message);
             sw.setFitsSystemWindows(true);
 
-        timer.start();
-        ((MainActivity)getActivity()).start_recording = true;
+            timer.start();
         sw.postDelayed(new Runnable() {
             int i = 0;
 
@@ -891,19 +888,21 @@ public class FragmentFour extends Fragment {
                     else {
                             is_train = true;
                     }
+                        if(counter1 >  2) {
+                                try {
+                                        ((MainActivity) getActivity()).register_event(is_train, switch_state);
+                                } catch (IOException e) {
+                                        e.printStackTrace();
+                                }
+                        }
 
-                    if(counter1 > 1) {
-                            try {
-                                    ((MainActivity) getActivity()).register_event(is_train, seekBar.getProgress());
-                            } catch (IOException e) {
-                                    e.printStackTrace();
-                            }
-                    }
-                        ((MainActivity)getActivity()).start_of_event = false;
+                            ((MainActivity) getActivity()).start_of_event = false;
+
                     Drawable image  = new BitmapDrawable(getResources(), bitmap);
                     sw.setImageDrawable(image);
                     sw.setFitsSystemWindows(true);
                     ((MainActivity)getActivity()).start_of_event = true;
+
                     sw.postDelayed(this, 11000);
                 timer.start();
 
@@ -939,7 +938,7 @@ public class FragmentFour extends Fragment {
         @Override
         public void onTick(long millisUntilFinished)
         {
-            if(counter++ == 2) {
+            if(counter++ == 6) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

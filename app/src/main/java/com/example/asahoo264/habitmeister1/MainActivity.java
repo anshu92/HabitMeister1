@@ -81,7 +81,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 	public static int theta_cnt = 0;
 
 
-	public void register_event(boolean is_train, int seekbar_progress) throws IOException {
+	public void register_event(boolean is_train, boolean seekbar_progress) throws IOException {
 		double alpha_sum = 0;
 		double alpha_var_sum = 0;
 		double alpha_mean;
@@ -136,7 +136,7 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 		theta_var = theta_var_sum/theta_cnt;
 
 		int emotion_label;
-		if(seekbar_progress > 2)
+		if(seekbar_progress)
 			emotion_label = 1;
 		else
 			emotion_label = 0;

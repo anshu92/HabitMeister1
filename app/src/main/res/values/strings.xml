@@ -29,4 +29,9 @@
     <string name="fragonetitle">CONNECT TO MUSE HEADBAND</string>
     <string name="fragtwotitle">REALTIME EEG AND ARTIFACTS</string>
     <string name="title_activity_drive_connect">DriveConnectActivity</string>
+    <string name="switch_yes"></string>
+    <string name="switch_no"></string>
+    <string name="calib_q">How does this picture make you feel?</string>
+
+
 </resources>

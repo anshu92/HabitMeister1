@@ -7,4 +7,7 @@
     <color name="title_color">#333333</color>
     <color name="teal">#E0F2F1</color>
     <color name="white">#FFFFFF</color>
+    <color name="red">#A00000</color>
+    <color name="green">#00FF33</color>
+
 </resources>
