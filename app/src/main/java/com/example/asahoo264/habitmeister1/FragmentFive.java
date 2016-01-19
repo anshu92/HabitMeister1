@@ -933,12 +933,12 @@ public class FragmentFive extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
 
-        String[] scaling1 = {"-l", "-1", "-u", "1", "-s", "/sdcard/range1", "/sdcard/svmguide1"/*, ">"*/, "/sdcard/svmguide1.scale"};
-        String[] scaling2 = {"-r", "/sdcard/range1", "/sdcard/svmguide1.t"/*, ">"*/, "/sdcard/svmguide1.t.scale"};
-        String[] training = {"/sdcard/svmguide1", "/sdcard/svmguide1.model"};
-        String[] training2 = {"/sdcard/svmguide1.scale", "/sdcard/svmguide1.scale.model"};
-        String[] testing = {"/sdcard/svmguide1.t", "/sdcard/svmguide1.model", "/sdcard/svmguide1.out"};
-        String[] testing2 = {"/sdcard/svmguide1.t.scale", "/sdcard/svmguide1.scale.model", "/sdcard/svmguide1.scale.out"};
+        String[] scaling1 = {"-l", "-1", "-u", "1", "-s", "/sdcard/range1", "/sdcard/svminput"/*, ">"*/, "/sdcard/svminput.scale"};
+        String[] scaling2 = {"-r", "/sdcard/range1", "/sdcard/svminput.t"/*, ">"*/, "/sdcard/svminput.t.scale"};
+        String[] training1 = {"/sdcard/svminput", "/sdcard/svminput.model"};
+        String[] training2 = {"/sdcard/svminput.scale", "/sdcard/svminput.scale.model"};
+        String[] testing1 = {"/sdcard/svminput.t", "/sdcard/svminput.model", "/sdcard/svminput.out"};
+        String[] testing2 = {"/sdcard/svminput.t.scale", "/sdcard/svminput.scale.model", "/sdcard/svminput.scale.out"};
 
         if (v.getId() == R.id.scale1) {
             //svm_problem prob = new svm_problem();
@@ -980,7 +980,7 @@ public class FragmentFive extends Fragment implements View.OnClickListener {
                 //svm_problem prob = new svm_problem();
                 TextView training_f = (TextView) (getActivity()).findViewById(R.id.training);
                 training_f.setText("training started...");
-                svm_train.main(training2);
+                svm_train.main(training1);
                 training_f.setText("training finished");
                 //svm_predict.main(testing);
             } catch (IOException e) {
@@ -999,7 +999,7 @@ public class FragmentFive extends Fragment implements View.OnClickListener {
                 TextView testing_f = (TextView) (getActivity()).findViewById(R.id.testing);
                 TextView result = (TextView) (getActivity()).findViewById(R.id.result);
                 testing_f.setText("testing started...");
-                svm_predict.main(testing2);
+                svm_predict.main(testing1);
                 testing_f.setText("testing finished");
                 String accuracy = "/sdcard/accuracy";
                 BufferedReader input = null;
