@@ -353,12 +353,13 @@ class svm_predict {
         return Integer.parseInt(s);
     }
 
-    private static void predict(BufferedReader input, DataOutputStream output, svm_model model, int predict_probability) throws IOException
+    private static double predict(BufferedReader input, DataOutputStream output, svm_model model, int predict_probability) throws IOException
     {
         int correct = 0;
         int total = 0;
         double error = 0;
         double sumv = 0, sumy = 0, sumvv = 0, sumyy = 0, sumvy = 0;
+        double ret = 0;
 
         int svm_type=svm.svm_get_svm_type(model);
         int nr_class=svm.svm_get_nr_class(model);
@@ -407,11 +408,13 @@ class svm_predict {
                 for(int j=0;j<nr_class;j++)
                     output.writeBytes(prob_estimates[j]+" ");
                 output.writeBytes("\n");
+                ret = v;
             }
             else
             {
                 v = svm.svm_predict(model,x);
                 output.writeBytes(v+"\n");
+                ret = v;
             }
 
             if(v == target)
@@ -444,6 +447,7 @@ class svm_predict {
             byte[] b = content.getBytes();
             f.write(b);
         }
+        return ret;
     }
 
     private static void exit_with_help()
@@ -455,10 +459,11 @@ class svm_predict {
         System.exit(1);
     }
 
-    public static void main(String argv[]) throws IOException
+    public static double main(String argv[]) throws IOException
     {
         int i, predict_probability=0;
         svm_print_string = svm_print_stdout;
+        double ret = 0;
 
         // parse options
         for(i=0;i<argv.length;i++)
@@ -506,9 +511,10 @@ class svm_predict {
                     svm_predict.info("Model supports probability estimates, but disabled in prediction.\n");
                 }
             }
-            predict(input,output,model,predict_probability);
+            ret = predict(input, output, model, predict_probability);
             input.close();
             output.close();
+            return ret;
         }
         catch(FileNotFoundException e)
         {
@@ -518,6 +524,7 @@ class svm_predict {
         {
             exit_with_help();
         }
+        return -1;
     }
 }
 
@@ -999,7 +1006,7 @@ public class FragmentFive extends Fragment implements View.OnClickListener {
                 TextView testing_f = (TextView) (getActivity()).findViewById(R.id.testing);
                 TextView result = (TextView) (getActivity()).findViewById(R.id.result);
                 testing_f.setText("testing started...");
-                svm_predict.main(testing1);
+                double ret = svm_predict.main(testing1);
                 testing_f.setText("testing finished");
                 String accuracy = "/sdcard/accuracy";
                 BufferedReader input = null;
@@ -1014,6 +1021,7 @@ public class FragmentFive extends Fragment implements View.OnClickListener {
                 String input_ = input.readLine();
                 System.out.println(input_);
                 result.setText("print result: " + input_);
+                //result.setText("print result: " + ret);
                 //svm_predict.main(testing);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
