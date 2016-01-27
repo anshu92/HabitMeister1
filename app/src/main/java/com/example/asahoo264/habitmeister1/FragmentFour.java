@@ -31,8 +31,6 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Switch;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -800,7 +798,7 @@ public class FragmentFour extends Fragment {
     private int counter1=1;
         private boolean is_train = true;
         private int number_images = 10;
-        private boolean switch_state = false;
+        private boolean switch_state = true;
 
     private int fix_cross = R.drawable.fixation;
 
@@ -881,35 +879,7 @@ public class FragmentFour extends Fragment {
                 if(counter1++ > number_images - 1){
                     counter1 = 1;
                     ((MainActivity)getActivity()).start_recording = false;
-                        timertext.setText("CALIBRATION DONE");
-                        String[] scaling1 = {"-l", "-1", "-u", "1", "-s", "/sdcard/range1", "/sdcard/svminput"/*, ">"*/, "/sdcard/svminput.scale"};
-                        String[] scaling2 = {"-r", "/sdcard/range1", "/sdcard/svminput.t"/*, ">"*/, "/sdcard/svminput.t.scale"};
-                        String[] training1 = {"/sdcard/svminput", "/sdcard/svminput.model"};
-                        String[] training2 = {"/sdcard/svminput.scale", "/sdcard/svminput.scale.model"};
-                        String[] testing1 = {"/sdcard/svminput.t", "/sdcard/svminput.model", "/sdcard/svminput.out"};
-                        String[] testing2 = {"/sdcard/svminput.t.scale", "/sdcard/svminput.scale.model", "/sdcard/svminput.scale.out"};
-
-                        try {
-                                svm_scale.main(scaling1);
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                        try {
-                                svm_scale.main(scaling2);
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                        try {
-                                svm_train.main(training1);
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                        try {
-                                svm_predict.main(testing1);
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                        return;
+                    return;
                 }
                 counter = 1;
                     if(counter1 > 0.5 * number_images ) {

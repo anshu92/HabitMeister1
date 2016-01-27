@@ -48,7 +48,6 @@ import android.widget.Toast;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -80,7 +79,6 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 	public static int beta_cnt = 0;
 	public static int gamma_cnt = 0;
 	public static int theta_cnt = 0;
-
 
 
 	public void register_event(boolean is_train, boolean seekbar_progress) throws IOException {
@@ -180,124 +178,9 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 
 	}
 
-	public void predict_event(boolean emotion_val) throws IOException {
-
-		double alpha_sum = 0;
-		double alpha_var_sum = 0;
-		double alpha_mean;
-		double alpha_var;
-		for(int i = 0; i < alpha_val.length;i++){
-			alpha_sum  =  alpha_sum +  alpha_val[i];
-		}
-		alpha_mean = alpha_sum/alpha_cnt;
-		for(int i = 0; i < alpha_val.length;i++){
-			alpha_var_sum  =  alpha_var_sum +  (alpha_val[i]-alpha_mean)*(alpha_val[i]-alpha_mean);
-		}
-		alpha_var = alpha_var_sum/alpha_cnt;
-
-		double beta_sum = 0;
-		double beta_var_sum = 0;
-		double beta_mean;
-		double beta_var;
-		for(int i = 0; i < beta_val.length;i++){
-			beta_sum  =  beta_sum +  beta_val[i];
-		}
-		beta_mean = beta_sum/beta_cnt;
-		for(int i = 0; i < beta_val.length;i++){
-			beta_var_sum  =  beta_var_sum +  (beta_val[i]-beta_mean)*(beta_val[i]-beta_mean);
-		}
-		beta_var = beta_var_sum/beta_cnt;
-
-		double gamma_sum = 0;
-		double gamma_var_sum = 0;
-		double gamma_mean;
-		double gamma_var;
-		for(int i = 0; i < gamma_val.length;i++){
-			gamma_sum  =  gamma_sum +  gamma_val[i];
-		}
-		gamma_mean = gamma_sum/gamma_cnt;
-		for(int i = 0; i < gamma_val.length;i++){
-			gamma_var_sum  =  gamma_var_sum +  (gamma_val[i]-gamma_mean)*(gamma_val[i]-gamma_mean);
-		}
-		gamma_var = gamma_var_sum/gamma_cnt;
-
-
-		double theta_sum = 0;
-		double theta_var_sum = 0;
-		double theta_mean;
-		double theta_var;
-		for(int i = 0; i < theta_val.length;i++){
-			theta_sum  =  theta_sum +  theta_val[i];
-		}
-		theta_mean = theta_sum/theta_cnt;
-		for(int i = 0; i < theta_val.length;i++){
-			theta_var_sum  =  theta_var_sum +  (theta_val[i]-theta_mean)*(theta_val[i]-theta_mean);
-		}
-		theta_var = theta_var_sum/theta_cnt;
-
-		String fname;
-		String fcontent;
-
-
-		fname = "svmpredict";
-
-		String fpath = "/sdcard/"+fname;
-
-		int emotion_label;
-		if(emotion_val)
-			emotion_label = 1;
-		else
-			emotion_label = 0;
-
-		File file = new File(fpath);
-
-		// If file does not exists, then create it
-		if (!file.exists()) {
-			file.createNewFile();
-		}
-
-		try {
-			fcontent = String.valueOf(emotion_label) + " 1:" + String.valueOf(alpha_var) + " 2:" + String.valueOf(beta_var)  + " 3:" + String.valueOf(gamma_var) + " 4:"  +  String.valueOf(theta_var) + "\n";
-			Toast.makeText(this, fcontent, Toast.LENGTH_SHORT).show();
-
-			FileOutputStream fOut = new FileOutputStream(file,false);
-			OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-			myOutWriter.write(fcontent);
-			myOutWriter.flush();
-			myOutWriter.close();
-			fOut.close();
-
-
-
-		} catch (IOException e) {
-			e.printStackTrace();
-
-		}
-
-		String fname1;
-		int prediction;
-		String[] testing1 = {"/sdcard/svmpredict", "/sdcard/svminput.model", "/sdcard/svmpredict.out"};
-
-		try {
-			svm_predict.main(testing1);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		fname1 = "svmpredict.out";
-
-		String fpath1 = "/sdcard/"+fname;
-		ReadSVMFileService ReadFile = new ReadSVMFileService(this,fpath1);
-
-		ReadFile.execute("");
-
-
-	}
-
-
-		/**
-         * Connection listener updates UI with new connection status and logs it.
-         */
+    /**
+	 * Connection listener updates UI with new connection status and logs it.
+	 */
 	class ConnectionListener extends MuseConnectionListener {
 
 		final WeakReference<Activity> activityRef;
@@ -643,15 +526,13 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 			}
 		}
 
-    final String[] data = {"Home", "Raw EEG", "Plot","Calibration", "SVM","Training"};
+    final String[] data = {"Home", "Raw EEG", "Plot","Calibration", "SVM"};
     final String[] fragments = {
             "com.example.asahoo264.habitmeister1.FragmentOne",
             "com.example.asahoo264.habitmeister1.FragmentTwo",
             "com.example.asahoo264.habitmeister1.FragmentThree",
             "com.example.asahoo264.habitmeister1.FragmentFour",
-			"com.example.asahoo264.habitmeister1.FragmentFive",
-			"com.example.asahoo264.habitmeister1.FragmentSix"
-
+			"com.example.asahoo264.habitmeister1.FragmentFive"
     };
     public Muse muse = null;
     public static ConnectionListener connectionListener = null;
@@ -676,37 +557,6 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-													  @Override
-													  public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-														  Log.e("Alert", "Might be disconnected");
-														  ConnectionState state = muse.getConnectionState();
-														  if (state == ConnectionState.CONNECTED ||
-																  state == ConnectionState.CONNECTING) {
-															  Log.w("Muse Headband",
-																	  "Might not be a connection problem");
-															  return;
-														  }
-														  configureLibrary();
-														  if (ON_PHONE) {
-															  fileWriter.open();
-															  fileWriter.addAnnotationString(1, "Connect clicked");
-														  }
-														  /**
-														   * In most cases libmuse native library takes care about
-														   * exceptions and recovery mechanism, but native code still
-														   * may throw in some unexpected situations (like bad bluetooth
-														   * connection). Print all exceptions here.
-														   */
-														  try {
-															  muse.runAsynchronously();
-														  } catch (Exception e) {
-															  Log.e("Muse Headband", e.toString());
-														  }
-													  }
-												  });
-
 
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, R.layout.navbarlayout, data);
@@ -742,74 +592,6 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 			Log.i("Muse Headband", dir.getPath());
 			fileWriter.addAnnotationString(1, "MainActivity onCreate");
 			dataListener.setFileWriter(fileWriter);
-
-			String fname;
-			fname = "svminput";
-			String fpath = "/sdcard/"+fname;
-
-			File file = new File(fpath);
-
-			if (file.exists()) {
-				file.delete();
-			}
-
-			fname = "svminput.t";
-
-			File file1 = new File(fpath);
-
-			if (file1.exists()) {
-				file1.delete();
-			}
-
-			fname = "svmpredict";
-
-			File file2 = new File(fpath);
-
-			if (file2.exists()) {
-				file2.delete();
-			}
-			fname = "range1";
-
-			File file3 = new File(fpath);
-
-			if (file3.exists()) {
-				file3.delete();
-			}
-			fname = "svminput.scale";
-
-			File file4 = new File(fpath);
-
-			if (file4.exists()) {
-				file4.delete();
-			}
-			fname = "svminput.t.scale";
-
-			File file5 = new File(fpath);
-
-			if (file5.exists()) {
-				file5.delete();
-			}
-			fname = "svminput.model";
-
-			File file6 = new File(fpath);
-
-			if (file6.exists()) {
-				file6.delete();
-			}
-			fname = "svminput.out";
-
-			File file7 = new File(fpath);
-
-			if (file7.exists()) {
-				file7.delete();
-			}
-			fname = "svmpredict.out";
-
-			File file8 = new File(fpath);
-
-			if (file8.exists()) {
-				file8.delete();
-			}
 		}
     }
 
