@@ -8,9 +8,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.Image;
+import android.media.SoundPool;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.app.Activity;
@@ -50,6 +54,7 @@ public class FragmentFour extends Fragment {
             "PLEASURE",
             "AVERSION"
     };
+    private static boolean emotion_val = false;
 
     private String[] urls_happy = {
             "https://googledrive.com/host/0ByMFXhN-e7luNVFXZnEzWnluQk0/P001.bmp",
@@ -1539,8 +1544,14 @@ public class FragmentFour extends Fragment {
         private boolean is_train = true;
         private int number_images = 10;
         private boolean switch_state = false;
+        /** soundId for Later handling of sound pool **/
+       private int baby_cry;
+        private int baby_laugh;
+       private SoundPool sp;
 
-    private int fix_cross = R.drawable.fixation;
+
+
+        private int fix_cross = R.drawable.fixation;
 
 
     public static Fragment newInstance(Context context) {
@@ -1553,6 +1564,24 @@ public class FragmentFour extends Fragment {
     public void onStart() {
 
         super.onStart();
+            int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+            if (currentapiVersion < Build.VERSION_CODES.LOLLIPOP) {
+                    sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+
+            }else {
+                    SoundPool.Builder sp21 = new SoundPool.Builder();
+                    sp21.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build());
+                    sp21.setMaxStreams(5);
+                    sp = sp21.build();
+            }
+
+
+       baby_cry = sp.load(getActivity(), R.raw.baby_cry, 1); // in 2nd param u have to pass your desire ringtone
+       baby_laugh = sp.load(getActivity(), R.raw.baby_laugh, 1); // in 2nd param u have to pass your desire ringtone
+
         sw = (ImageSwitcher) (getActivity()).findViewById(R.id.imageSwitcher);
         seekBar = (Switch) (getActivity()).findViewById(R.id.switchbar);
         textView = (TextView) (getActivity()).findViewById(R.id.progress);
@@ -1669,7 +1698,14 @@ public class FragmentFour extends Fragment {
                     Drawable image  = new BitmapDrawable(getResources(), bitmap);
                     sw.setImageDrawable(image);
                     sw.setFitsSystemWindows(true);
+
                     ((MainActivity)getActivity()).start_of_event = true;
+                       if(emotion_val) {
+                               sp.play(baby_laugh, 1, 1, 0, -1, 1);
+                       }else{
+                               sp.play(baby_cry, 1, 1, 0, -1, 1);
+                       }
+
 
                     sw.postDelayed(this, 11000);
                 timer.start();
@@ -1707,6 +1743,8 @@ public class FragmentFour extends Fragment {
         public void onTick(long millisUntilFinished)
         {
             if(counter++ == 6) {
+                    sp.autoPause();
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -1715,16 +1753,22 @@ public class FragmentFour extends Fragment {
                         String url = urls[index];;
                         if(index >= 210) {
                             aversion_counter++;
+                            emotion_val = false;
                             if(aversion_counter > 3){
                                 aversion_counter = 0;
                                 url = urls_happy[r.nextInt(urls_happy.length - 1)];
+                                emotion_val = true;
+
                             }
                         }
                         else{
                             happy_counter++;
+                            emotion_val = true;
                             if(happy_counter > 3){
                                 happy_counter = 0;
                                 url = urls_aversion[r.nextInt(urls_aversion.length - 1)];
+                                emotion_val = false;
+
                             }
                         }
                         new LoadImage().execute(url);
