@@ -71,7 +71,6 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
     public static ConnectionState connection_state = null;
     public static ConnectionState previous_connection_state = null;
     public static int[] epoch_num = new int[10];
-	
 	public static final boolean ON_PHONE = true;
 	public static double[] alpha_val = new double[150];
 	public static double[] beta_val = new double[150];
@@ -148,9 +147,9 @@ public class MainActivity extends Activity implements FragmentOne.update_conn_st
 		String fcontent;
 
 		if(is_train)
-			fname = "svminput";
-		else
 			fname = "svminput.t";
+		else
+			fname = "svminput";
 
 		String fpath = "/sdcard/"+fname;
 
