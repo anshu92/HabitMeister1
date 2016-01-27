@@ -1,6 +1,8 @@
 package com.example.asahoo264.habitmeister1;
 
-import android.app.ProgressDialog;
+import android.app.ActionBar.LayoutParams;
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
@@ -8,48 +10,39 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.app.Activity;
-import android.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher.ViewFactory;
-import android.app.ActionBar.LayoutParams;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.Switch;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Random;
 
 
-public class FragmentFour extends Fragment {
+public class FragmentSix extends Fragment {
 
     private ImageSwitcher sw;
     private final Random r = new Random();
     private Bitmap bitmap;
     public static int id = 4;
-    private  int imageIds[]={R.drawable.a001,R.drawable.a001,R.drawable.n001,R.drawable.sp001,R.drawable.sn001,R.drawable.p001};
     private String[] emotions = {
-            "PLEASURE",
-            "AVERSION"
-    };
+                "PLEASURE",
+                "AVERSION"
+        };
+    private static boolean emotion_val = false;
+
 
     private String[] urls_happy = {
             "https://googledrive.com/host/0ByMFXhN-e7luNVFXZnEzWnluQk0/P001.bmp",
@@ -1528,7 +1521,7 @@ public class FragmentFour extends Fragment {
     private TextView textView;
     private TextView timertext;
     private CalibCountDownTimer timer;
-    private final long startTime = 10000;
+    private final long startTime = 14000;
     private final long interval = 1000;
     private long timeElapsed;
     private boolean timerHasStarted = false;
@@ -1538,13 +1531,13 @@ public class FragmentFour extends Fragment {
     private int aversion_counter = 0;
         private boolean is_train = true;
         private int number_images = 10;
-        private boolean switch_state = false;
+        private boolean switch_state = true;
 
     private int fix_cross = R.drawable.fixation;
 
 
     public static Fragment newInstance(Context context) {
-    	FragmentFour f = new FragmentFour();
+    	FragmentSix f = new FragmentSix();
  
         return f;
     }
@@ -1554,26 +1547,11 @@ public class FragmentFour extends Fragment {
 
         super.onStart();
         sw = (ImageSwitcher) (getActivity()).findViewById(R.id.imageSwitcher);
-        seekBar = (Switch) (getActivity()).findViewById(R.id.switchbar);
         textView = (TextView) (getActivity()).findViewById(R.id.progress);
         timertext = (TextView) (getActivity()).findViewById(R.id.timer);
         timer = new CalibCountDownTimer(startTime,interval);
 
-            seekBar.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView,
-                                                 boolean isChecked) {
-
-                            switch_state = isChecked;
-                            if (isChecked)
-                                    textView.setText(emotions[1]);
-                            else
-                                    textView.setText(emotions[0]);
-
-
-                    }
-            });
         sw.setFactory(new ViewFactory() {
             @Override
             public View makeView() {
@@ -1585,7 +1563,7 @@ public class FragmentFour extends Fragment {
         });
 
             int index_state = 0;
-        if(switch_state)
+        if(emotion_val)
                 index_state = 0;
          else
                 index_state = 1;
@@ -1619,59 +1597,22 @@ public class FragmentFour extends Fragment {
                 if(counter1++ > number_images - 1){
                     counter1 = 1;
                     ((MainActivity)getActivity()).start_recording = false;
-                        timertext.setText("CALIBRATION DONE");
-                        String[] scaling1 = {"-l", "-1", "-u", "1", "-s", "/sdcard/range1", "/sdcard/svminput"/*, ">"*/, "/sdcard/svminput.scale"};
-                        String[] scaling2 = {"-r", "/sdcard/range1", "/sdcard/svminput.t"/*, ">"*/, "/sdcard/svminput.t.scale"};
-                        String[] training1 = {"/sdcard/svminput", "/sdcard/svminput.model"};
-                        String[] training2 = {"/sdcard/svminput.scale", "/sdcard/svminput.scale.model"};
-                        String[] testing1 = {"/sdcard/svminput.t", "/sdcard/svminput.model", "/sdcard/svminput.out"};
-                        String[] testing2 = {"/sdcard/svminput.t.scale", "/sdcard/svminput.scale.model", "/sdcard/svminput.scale.out"};
+                        timertext.setText("TRAINING DONE");
 
-                        try {
-                                svm_scale.main(scaling1);
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                        try {
-                                svm_scale.main(scaling2);
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                        try {
-                                svm_train.main(training1);
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                        try {
-                                svm_predict.main(testing1);
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
                         return;
                 }
                 counter = 1;
-                    if(counter1 > 0.5 * number_images ) {
-                            is_train = false;
-                    }
-                    else {
-                            is_train = true;
-                    }
-                        if(counter1 >  2) {
-                                try {
-                                        ((MainActivity) getActivity()).register_event(is_train, switch_state);
-                                } catch (IOException e) {
-                                        e.printStackTrace();
-                                }
-                        }
 
-                            ((MainActivity) getActivity()).start_of_event = false;
+
+
 
                     Drawable image  = new BitmapDrawable(getResources(), bitmap);
                     sw.setImageDrawable(image);
                     sw.setFitsSystemWindows(true);
+
                     ((MainActivity)getActivity()).start_of_event = true;
 
-                    sw.postDelayed(this, 11000);
+                    sw.postDelayed(this, 15000);
                 timer.start();
 
             }
@@ -1684,7 +1625,7 @@ public class FragmentFour extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
-        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_four, null);
+        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_six, null);
 
         return root;
     }
@@ -1706,15 +1647,34 @@ public class FragmentFour extends Fragment {
         @Override
         public void onTick(long millisUntilFinished)
         {
-            if(counter++ == 6) {
-                getActivity().runOnUiThread(new Runnable() {
+            if(counter++ == 10) {
+                    ((MainActivity) getActivity()).start_of_event = false;
+                    if(counter1 >  2) {
+                            try {
+                                    int index_state =0;
+                                    ((MainActivity) getActivity()).predict_event(emotion_val);
+                                    if(emotion_val)
+                                            index_state = 0;
+                                    else
+                                            index_state = 1;
+
+                                    // Initialize the textview with '0'
+                                    textView.setText(emotions[index_state]);
+                            } catch (IOException e) {
+                                    e.printStackTrace();
+                            }
+                    }
+
+                    getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        sw.setImageDrawable(null);
+                        //sw.setImageDrawable(null);
+
                         int index = r.nextInt(urls.length - 1);
                         String url = urls[index];;
                         if(index >= 210) {
                             aversion_counter++;
+                            emotion_val = false;
                             if(aversion_counter > 3){
                                 aversion_counter = 0;
                                 url = urls_happy[r.nextInt(urls_happy.length - 1)];
@@ -1722,6 +1682,7 @@ public class FragmentFour extends Fragment {
                         }
                         else{
                             happy_counter++;
+                            emotion_val = true;
                             if(happy_counter > 3){
                                 happy_counter = 0;
                                 url = urls_aversion[r.nextInt(urls_aversion.length - 1)];

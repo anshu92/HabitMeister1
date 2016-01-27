@@ -37,29 +37,7 @@
         android:gravity="center"/>
 
 </LinearLayout>
-        <RelativeLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:fitsSystemWindows="false"
-            android:baselineAligned="false"
-            android:background="@color/teal">
 
-            <Switch
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:thumb="@drawable/apptheme_switch_inner_holo_light"
-                android:track="@drawable/apptheme_switch_track_holo_light"
-                android:textOn="@string/switch_no"
-                android:textOff="@string/switch_yes"
-                android:textColor="#000000"
-                android:textStyle="bold"
-                android:id="@+id/switchbar" />
-
-
-        </RelativeLayout>
 
 
     <LinearLayout
